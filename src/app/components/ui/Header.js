@@ -1,8 +1,38 @@
-// components/Header.jsx
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Function to close mobile menu
+  const closeMenu = (e) => {
+    // Stop event propagation
+    if (e) e.stopPropagation();
+
+    const navbarCollapse = document.getElementById("navbarNavDropdown");
+    if (navbarCollapse) {
+      const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+        hide: true,
+      });
+      bsCollapse.hide();
+      setIsMenuOpen(false);
+    }
+  };
+
+  // Function to toggle menu
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Initialize Bootstrap collapse
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      require("bootstrap/js/dist/collapse");
+    }
+  }, []);
+
   return (
     <header
       id="header"
@@ -15,7 +45,12 @@ export default function Header() {
       <div className="container">
         <nav className="js-mega-menu navbar-nav-wrap">
           {/* Default Logo */}
-          <Link className="navbar-brand" href="/" aria-label="Front">
+          <Link
+            className="navbar-brand"
+            href="/"
+            aria-label="Front"
+            onClick={closeMenu}
+          >
             <Image
               className="navbar-brand-logo"
               src="/logo.png"
@@ -32,37 +67,47 @@ export default function Header() {
             data-bs-toggle="collapse"
             data-bs-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown"
-            aria-expanded="false"
+            aria-expanded={isMenuOpen}
             aria-label="Toggle navigation"
+            onClick={toggleMenu}
           >
-            <span className="navbar-toggler-default">
+            <span className={isMenuOpen ? "d-none" : "navbar-toggler-default"}>
               <i className="bi-list"></i>
             </span>
-            <span className="navbar-toggler-toggled">
+            <span
+              className={isMenuOpen ? "navbar-toggler-toggled" : "d-none"}
+              onClick={(e) => {
+                e.stopPropagation();
+                closeMenu(e);
+              }}
+            >
               <i className="bi-x"></i>
             </span>
           </button>
 
           {/* Collapse */}
-          <div className="collapse navbar-collapse" id="navbarNavDropdown">
+          <div
+            className={`collapse navbar-collapse ${isMenuOpen ? "show" : ""}`}
+            id="navbarNavDropdown"
+          >
             <ul id="navbarNavDropdownNav" className="navbar-nav">
               <li className="nav-item">
-                <Link className="nav-link" href="/">
+                <Link className="nav-link" href="/" onClick={closeMenu}>
                   Home
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" href="/about">
+                <Link className="nav-link" href="/about" onClick={closeMenu}>
                   About
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" href="#">
+                <Link className="nav-link" href="#" onClick={closeMenu}>
                   Blog
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" href="/contact">
+                <Link className="nav-link" href="/contact" onClick={closeMenu}>
                   Contacts
                 </Link>
               </li>
@@ -73,6 +118,7 @@ export default function Header() {
                   className="btn btn-primary btn-transition"
                   href="#"
                   target="_blank"
+                  onClick={closeMenu}
                 >
                   Enquire Now
                 </Link>

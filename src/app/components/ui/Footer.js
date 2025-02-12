@@ -12,10 +12,10 @@ export default function Footer() {
               <Link className="navbar-brand" href="/">
                 <Image
                   className="navbar-brand-logo"
-                  src="/assets/svg/logos/logo.svg"
+                  src="/logo.png"
                   alt="Logo"
-                  width={120}
-                  height={40}
+                  width={200}
+                  height={80}
                 />
               </Link>
             </div>

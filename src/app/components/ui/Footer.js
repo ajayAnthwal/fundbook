@@ -213,7 +213,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="w-md-85 text-lg-center mx-lg-auto">
-          <p className="text-muted small">&copy; Front. 2021 Htmlstream. All rights reserved.</p>
+          <p className="text-muted small">&copy; Fundbook 2025. All rights reserved.</p>
           <p className="text-muted small">
             When you visit or interact with our sites, services or tools, we or our authorised service providers may use cookies for storing information to help provide you with a better, faster and safer experience and for marketing purposes.
           </p>

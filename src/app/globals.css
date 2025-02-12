@@ -1,0 +1,40 @@
+.text-highlight-primary {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .text-highlight-primary::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background-color: rgba(0, 122, 255, 0.1);
+    z-index: -1;
+  }
+
+  /* Optional custom styles */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding: 1rem 0;
+  }
+  
+  .dropdown-menu {
+    border: none;
+    padding-left: 1rem;
+  }
+  
+  .nav-item {
+    padding: 0.5rem 0;
+  }
+}
+
+.svg-icon {
+  display: inline-block;
+  line-height: 1;
+}
+
+.svg-icon {
+  color: rgb(55 125 255) !important;
+}

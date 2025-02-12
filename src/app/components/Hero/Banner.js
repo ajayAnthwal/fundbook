@@ -32,7 +32,9 @@ const Banner = () => {
                   </span>
                 </h1>
 
-                <p className="lead">Front's feature-rich designed demo pages help you create the best possible product.</p>
+                <p className="lead"> Fundbook connects MSMEs with trusted lenders and CAs, making it easier to access credit through a streamlined, transparent platform. We’re dedicated to fueling business growth and supporting economic progress for small enterprises. 
+
+</p>
               </div>
 
               <div className="d-grid d-sm-flex gap-3">

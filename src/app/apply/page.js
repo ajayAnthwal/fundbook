@@ -36,7 +36,7 @@
 //         ></div>
 //       </div>
 
-//       {/* Stage content */}
+      {/* Stage content */}
 //       {currentStage === 1 && (
 //         <Stage1 
 //           formData={formData.stage1} 

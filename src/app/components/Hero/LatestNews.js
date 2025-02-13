@@ -96,6 +96,91 @@ export default function LatestNews() {
         </div>
         {/* End Col */}
       </div>
+
+      
+      <div className="row gx-3 mb-5 mb-md-9">
+        <div className="col-sm-6 col-lg-3 mb-3 mb-lg-0">
+          {/* Card */}
+          <Link className="card card-transition" href="#">
+            <Image
+              className="card-img-top"
+              src="/assets/img/500x280/img9.jpg"
+              alt="Image Description"
+              width={500}
+              height={170}
+            />
+            <div className="card-body">
+              <span className="card-subtitle text-primary">Product</span>
+              <h5 className="card-text lh-base">
+                Better is when everything works together
+              </h5>
+            </div>
+          </Link>
+          {/* End Card */}
+        </div>
+        {/* End Col */}
+
+        <div className="col-sm-6 col-lg-3 mb-3 mb-lg-0">
+          {/* Card */}
+          <Link className="card card-transition h-100" href="#">
+            <Image
+              className="card-img-top"
+              src="/assets/img/500x280/img10.jpg"
+              alt="Image Description"
+              width={500}
+              height={170}
+            />
+            <div className="card-body">
+              <span className="card-subtitle text-primary">Business</span>
+              <h5 className="card-text lh-base">What CFR really is about</h5>
+            </div>
+          </Link>
+          {/* End Card */}
+        </div>
+        {/* End Col */}
+
+        <div className="col-sm-6 col-lg-3 mb-3 mb-sm-0">
+          {/* Card */}
+          <Link className="card card-transition h-100" href="#">
+            <Image
+              className="card-img-top"
+              src="/assets/img/500x280/img11.jpg"
+              alt="Image Description"
+              width={500}
+              height={170}
+            />
+            <div className="card-body">
+              <span className="card-subtitle text-primary">Business</span>
+              <h5 className="card-text lh-base">
+                Should Product Owners think like entrepreneurs?
+              </h5>
+            </div>
+          </Link>
+          {/* End Card */}
+        </div>
+        {/* End Col */}
+
+        <div className="col-sm-6 col-lg-3">
+          {/* Card */}
+          <Link className="card card-transition h-100" href="#">
+            <Image
+              className="card-img-top"
+              src="/assets/img/500x280/img12.jpg"
+              alt="Image Description"
+              width={500}
+              height={170}
+            />
+            <div className="card-body">
+              <span className="card-subtitle text-primary">Facilitate</span>
+              <h5 className="card-text lh-base">
+                Announcing Front Strategies: Ready-to-use rules
+              </h5>
+            </div>
+          </Link>
+          {/* End Card */}
+        </div>
+        {/* End Col */}
+      </div>
       {/* End Row */}
 
       {/* Card Info */}

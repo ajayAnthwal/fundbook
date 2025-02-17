@@ -1,9 +1,8 @@
-"use client"; // Next.js ke liye required
+"use client";
 
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, EffectFade, Thumbs } from "swiper/modules";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Navigation, Pagination, EffectFade, Autoplay } from "swiper/modules";
 
 const Slider = () => {
   return (
@@ -11,7 +10,7 @@ const Slider = () => {
       {/* Main Slider */}
       <div className="swiper-container vh-md-80 h-[90vh]">
         <Swiper
-          modules={[Navigation, Pagination, EffectFade]}
+          modules={[Navigation, Pagination, EffectFade, Autoplay]} // Add Autoplay to modules
           navigation={{
             nextEl: ".swiper-button-next",
             prevEl: ".swiper-button-prev",
@@ -19,6 +18,10 @@ const Slider = () => {
           pagination={{ clickable: true }}
           effect="fade"
           loop={true}
+          autoplay={{
+            delay: 5000, // 5 seconds
+            disableOnInteraction: false, // Keeps autoplay running even after user interacts
+          }}
           className="js-swiper-main"
         >
           {/* Slide 1 */}
@@ -26,7 +29,7 @@ const Slider = () => {
             <div
               className="swiper-slide gradient-y-overlay-sm-gray-900 bg-img-start"
               style={{
-                backgroundImage: `url(/assets/img/1920x800/img2.jpg)`,
+                backgroundImage: `url(/slider_1.webp)`,
                 backgroundSize: "cover",
               }}
             >
@@ -36,6 +39,14 @@ const Slider = () => {
                   <h1 className="display-4 text-white mb-0">
                     Self-mastering template
                   </h1>
+                  <div class="button-container d-flex gap-3">
+                    <a class="btn btn-primary px-4 py-2" href="#">
+                      Apply Loan
+                    </a>
+                    <a class="btn btn-secondary px-4 py-2" href="#">
+                      Register
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -46,7 +57,7 @@ const Slider = () => {
             <div
               className="swiper-slide gradient-y-overlay-sm-gray-900 bg-img-start"
               style={{
-                backgroundImage: `url(/assets/img/1920x800/img3.jpg)`,
+                backgroundImage: `url(/slider_2.webp)`,
                 backgroundSize: "cover",
               }}
             >
@@ -56,6 +67,68 @@ const Slider = () => {
                   <h2 className="display-4 text-white mb-0">
                     Easy business with Front template
                   </h2>
+                  <div class="button-container d-flex gap-3">
+                    <a class="btn btn-primary px-4 py-2" href="#">
+                      Apply Loan
+                    </a>
+                    <a class="btn btn-secondary px-4 py-2" href="#">
+                      Register
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              className="swiper-slide gradient-y-overlay-sm-gray-900 bg-img-start"
+              style={{
+                backgroundImage: `url(/slider_3.webp)`,
+                backgroundSize: "cover",
+              }}
+            >
+              <div className="container d-md-flex align-items-md-center vh-md-70 content-space-t-4 content-space-b-3 content-space-md-0">
+                <div className="w-75 w-lg-50">
+                  <h3 className="text-white">It is an</h3>
+                  <h2 className="display-4 text-white mb-0">
+                    Easy business with Front template
+                  </h2>
+                  <div class="button-container d-flex gap-3">
+                    <a class="btn btn-primary px-4 py-2" href="#">
+                      Apply Loan
+                    </a>
+                    <a class="btn btn-secondary px-4 py-2" href="#">
+                      Register
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              className="swiper-slide gradient-y-overlay-sm-gray-900 bg-img-start"
+              style={{
+                backgroundImage: `url(/slider_4.webp)`,
+                backgroundSize: "cover",
+              }}
+            >
+              <div className="container d-md-flex align-items-md-center vh-md-70 content-space-t-4 content-space-b-3 content-space-md-0">
+                <div className="w-75 w-lg-50">
+                  <h3 className="text-white">It is an</h3>
+                  <h2 className="display-4 text-white mb-0">
+                    Easy business with Front template
+                  </h2>
+                  <div class="button-container d-flex gap-3">
+                    <a class="btn btn-primary px-4 py-2" href="#">
+                      Apply Loan
+                    </a>
+                    <a class="btn btn-secondary px-4 py-2" href="#">
+                      Register
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

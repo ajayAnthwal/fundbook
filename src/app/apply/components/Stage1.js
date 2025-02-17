@@ -58,6 +58,7 @@
 //             >
 //               <option value="">Select loan type</option>
 //               <option value="business">Business Loan</option>
+
 //               <option value="personal">Personal Loan</option>
 //               <option value="education">Education Loan</option>
 //             </select>

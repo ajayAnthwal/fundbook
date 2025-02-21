@@ -17,6 +17,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.1",
+    "react-responsive-carousel": "^3.2.23",
     "swiper": "^11.2.3",
     "typed.js": "^2.1.0"
   },

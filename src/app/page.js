@@ -5,15 +5,19 @@ import Features from "./components/Hero/Features";
 import LatestNews from "./components/Hero/LatestNews";
 import Slider from "./components/Hero/Slider";
 import SuccessStories from "./components/Hero/SuccessStories";
+import AdvancedAnalytics from "./components/Hero/AdvancedAnalytics";
+import Logos from "./components/Hero/Logos";
 export default function Home() {
   return (
     <>
-     <Slider />
-     <Banner />
-     <SuccessStories />
-     <Card />
-     <Features />
-     <LatestNews />
+      <Slider />
+      <Card />
+      <Banner />
+      <AdvancedAnalytics />
+      <SuccessStories />
+      <Logos />
+      <Features />
+      <LatestNews />
     </>
   );
 }

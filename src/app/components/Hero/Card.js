@@ -6,7 +6,7 @@ export default function Card() {
     <div className="container py-5">
       {/* Heading */}
       <div className="text-center mb-5">
-        <h2 className="display-5 fw-bold mb-4">Value Proposition</h2>
+        <h2 className="display-5 fw-bold mb-4 capitalize">What We Offer</h2>
       </div>
 
       {/* Cards */}

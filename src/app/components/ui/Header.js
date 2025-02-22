@@ -78,22 +78,22 @@ export default function Header() {
           >
             <ul id="navbarNavDropdownNav" className="navbar-nav">
               <li className="nav-item">
-                <Link className="nav-link text-white" href="/" onClick={closeMenu}>
+                <Link className="nav-link text-black" href="/" onClick={closeMenu}>
                   Home
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" href="/about" onClick={closeMenu}>
+                <Link className="nav-link text-black" href="/about" onClick={closeMenu}>
                   About
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" href="#" onClick={closeMenu}>
+                <Link className="nav-link text-black" href="#" onClick={closeMenu}>
                   Blog
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" href="/contact" onClick={closeMenu}>
+                <Link className="nav-link text-black" href="/contact" onClick={closeMenu}>
                   Contacts
                 </Link>
               </li>

@@ -17,7 +17,7 @@ export default function Home() {
       <SuccessStories />
       <Logos />
       <Features />
-      <LatestNews />
+      {/* <LatestNews /> */}
     </>
   );
 }

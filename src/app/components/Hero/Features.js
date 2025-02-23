@@ -5,76 +5,10 @@ export default function Features() {
   return (
     <>
       {/* Features */}
-      <div className="container py-5">
-        {/* Heading */}
-        <div className="text-center mb-5">
-          <h2 className="display-5 fw-bold mb-3">
+      {/* <h2 className="display-5 fw-bold mb-3">
             Wow your audience from the first second
-          </h2>
-          <p className="text-muted">
-            The powerful and flexible theme for all kinds of businesses
-          </p>
-        </div>
-
-        <div className="row align-items-center g-5">
-          <div className="col-lg-7">
-            <Image
-              className="img-fluid rounded-3"
-              src="/assets/img/1618x1010/img6.jpg"
-              alt="Browser Preview"
-              width={1618}
-              height={1010}
-            />
-          </div>
-
-          <div className="col-lg-5">
-            <h2 className="fw-bold mb-4">
-              Collaborative tools to design user experience
-            </h2>
-            <p className="text-muted mb-4">
-              We help businesses bring ideas to life in the digital world, by
-              designing and implementing the technology tools that they need to
-              win.
-            </p>
-
-            <div className="mb-4">
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-check2 text-primary me-2"></i>
-                <span>Less routine – more creativity</span>
-              </div>
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-check2 text-primary me-2"></i>
-                <span>Hundreds of thousands saved</span>
-              </div>
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-check2 text-primary me-2"></i>
-                <span>Scale budgets efficiently</span>
-              </div>
-            </div>
-
-            <Link href="#" className="btn btn-primary px-4 py-2">
-              Get started
-            </Link>
-
-            <hr className="my-5" />
-
-            <p className="text-muted mb-4">Trusted by leading companies</p>
-            <div className="row g-4 align-items-center">
-              {["fitbit", "forbes", "mailchimp", "layar"].map((brand) => (
-                <div key={brand} className="col-3">
-                  <Image
-                    src={`/assets/svg/brands/${brand}-dark.svg`}
-                    alt={`${brand} logo`}
-                    width={80}
-                    height={40}
-                    className="img-fluid"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+          </h2> */}
+     
 
       <div className="container py-5 mx-auto">
         <div className="row justify-content-center g-4">

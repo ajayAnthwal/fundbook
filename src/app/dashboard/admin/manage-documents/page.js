@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 
 const ManageDocuments = () => {
@@ -9,14 +10,16 @@ const ManageDocuments = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Manage Documents</h1>
-      <button onClick={addDocument} className="bg-green-500 text-white px-4 py-2 rounded">
-        Add Document Type
+    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+      <h1 className="fs-4 fw-bold mb-4">📄 Manage Documents</h1>
+
+      <button onClick={addDocument} className="btn btn-success mb-3">
+        ➕ Add Document Type
       </button>
-      <ul className="mt-4">
+
+      <ul className="list-group">
         {documents.map((d, index) => (
-          <li key={index} className="p-2 border">{d}</li>
+          <li key={index} className="list-group-item">{d}</li>
         ))}
       </ul>
     </div>

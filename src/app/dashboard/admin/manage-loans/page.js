@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 
 const ManageLoans = () => {
@@ -9,14 +10,16 @@ const ManageLoans = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Manage Loan Types</h1>
-      <button onClick={addLoan} className="bg-green-500 text-white px-4 py-2 rounded">
-        Add Loan Type
+    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+      <h1 className="fs-4 fw-bold mb-4">🏦 Manage Loan Types</h1>
+
+      <button onClick={addLoan} className="btn btn-success mb-3">
+        ➕ Add Loan Type
       </button>
-      <ul className="mt-4">
+
+      <ul className="list-group">
         {loanTypes.map((l, index) => (
-          <li key={index} className="p-2 border">{l}</li>
+          <li key={index} className="list-group-item">{l}</li>
         ))}
       </ul>
     </div>

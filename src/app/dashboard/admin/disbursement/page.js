@@ -1,3 +1,4 @@
+  "use client";
 import { useState } from "react";
 
 const Disbursement = () => {
@@ -9,27 +10,41 @@ const Disbursement = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Loan Disbursement</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input 
-          type="text" 
-          placeholder="Loan ID" 
-          className="border p-2 w-full"
-          onChange={(e) => setForm({ ...form, loanId: e.target.value })}
-        />
-        <input 
-          type="text" 
-          placeholder="Amount Disbursed" 
-          className="border p-2 w-full"
-          onChange={(e) => setForm({ ...form, amount: e.target.value })}
-        />
-        <input 
-          type="date" 
-          className="border p-2 w-full"
-          onChange={(e) => setForm({ ...form, date: e.target.value })}
-        />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+      <h1 className="fs-4 fw-bold mb-4">🏦 Loan Disbursement</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow">
+        <div className="mb-3">
+          <label className="form-label">Loan ID</label>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter Loan ID"
+            onChange={(e) => setForm({ ...form, loanId: e.target.value })}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Amount Disbursed</label>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter Amount"
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Disbursement Date</label>
+          <input
+            type="date"
+            className="form-control"
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary w-100">
+          Submit
+        </button>
       </form>
     </div>
   );

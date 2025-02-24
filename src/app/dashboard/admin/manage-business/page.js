@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 
 const ManageBusiness = () => {
@@ -9,14 +10,16 @@ const ManageBusiness = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Manage Business Types</h1>
-      <button onClick={addBusiness} className="bg-green-500 text-white px-4 py-2 rounded">
-        Add Business Type
+    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+      <h1 className="fs-4 fw-bold mb-4">🏢 Manage Business Types</h1>
+
+      <button onClick={addBusiness} className="btn btn-success mb-3">
+        ➕ Add Business Type
       </button>
-      <ul className="mt-4">
+
+      <ul className="list-group">
         {businessTypes.map((b, index) => (
-          <li key={index} className="p-2 border">{b}</li>
+          <li key={index} className="list-group-item">{b}</li>
         ))}
       </ul>
     </div>

@@ -1,10 +1,15 @@
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap
+
 const Table = ({ data, columns }) => {
-    return (
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
+  return (
+    <div className="container mt-4">
+      <table className="table table-bordered table-hover">
+        <thead className="table-dark">
           <tr>
             {columns.map((col) => (
-              <th key={col} className="border p-2">{col}</th>
+              <th key={col} className="text-center text-white">
+                {col}
+              </th>
             ))}
           </tr>
         </thead>
@@ -12,14 +17,16 @@ const Table = ({ data, columns }) => {
           {data.map((row, index) => (
             <tr key={index}>
               {columns.map((col) => (
-                <td key={col} className="border p-2">{row[col]}</td>
+                <td key={col} className="text-center">
+                  {row[col]}
+                </td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-    );
-  };
-  
-  export default Table;
-  
+    </div>
+  );
+};
+
+export default Table;

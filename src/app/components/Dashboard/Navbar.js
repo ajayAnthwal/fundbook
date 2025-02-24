@@ -1,6 +1,7 @@
-"use client"; 
+"use client";
 
 import { useRouter } from "next/navigation";
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap
 
 const Navbar = ({ user }) => {
   const router = useRouter();
@@ -11,9 +12,9 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <nav className="bg-gray-800 text-white p-4 flex justify-between">
-      <h1 className="text-xl">Dashboard</h1>
-      <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
+    <nav className="navbar navbar-dark bg-dark px-4">
+      <span className="navbar-brand fs-4 fw-bold">📊 Dashboard</span>
+      <button onClick={handleLogout} className="btn btn-danger">
         Logout
       </button>
     </nav>

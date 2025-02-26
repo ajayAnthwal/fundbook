@@ -38,56 +38,53 @@ const EditProfilePage = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
-      <form onSubmit={handleSubmit} className="border p-4 rounded-lg shadow">
-        <label className="block mb-2">
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="border p-2 w-full"
-          />
-        </label>
-        <label className="block mb-2">
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="border p-2 w-full"
-          />
-        </label>
-        <label className="block mb-2">
-          Phone:
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            className="border p-2 w-full"
-          />
-        </label>
-        <label className="block mb-2">
-          Address:
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="border p-2 w-full"
-          />
-        </label>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-        >
-          Save
-        </button>
-      </form>
+    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
+      <div className="card shadow-lg p-4" style={{ width: "100%", maxWidth: "500px" }}>
+        <h2 className="text-center mb-4">Edit Profile</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Phone</label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Address</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="form-control"
+            />
+          </div>
+          <button type="submit" className="btn btn-primary w-100">Save</button>
+        </form>
+      </div>
     </div>
   );
 };

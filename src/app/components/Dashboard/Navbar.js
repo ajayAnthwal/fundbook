@@ -13,10 +13,22 @@ const Navbar = ({ user }) => {
 
   return (
     <nav className="navbar navbar-dark bg-dark px-4">
-      <span className="navbar-brand fs-4 fw-bold">📊 Dashboard</span>
-      <button onClick={handleLogout} className="btn btn-danger">
-        Logout
-      </button>
+      <div className="container-fluid d-flex justify-content-between align-items-center">
+        <span className="navbar-brand fs-4 fw-bold">📊 Dashboard</span>
+
+        <div className="d-flex align-items-center">
+          {user && <span className="text-white me-3 fw-semibold">👤 {user.name}</span>}
+          <button 
+            onClick={handleLogout} 
+            className="btn btn-danger"
+            style={{ transition: "0.3s" }}
+            onMouseOver={(e) => (e.target.style.backgroundColor = "#c82333")}
+            onMouseOut={(e) => (e.target.style.backgroundColor = "#dc3545")}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </nav>
   );
 };

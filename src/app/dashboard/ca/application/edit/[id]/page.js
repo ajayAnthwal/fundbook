@@ -1,25 +1,29 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getApplicationDetails, updateApplication } from "@/api/documents";
+import { Container, Card, Form, Button, Spinner } from "react-bootstrap";
+
 const EditApplication = () => {
+  const { id } = useParams();
   const router = useRouter();
-  const { id } = router.query;
-  const [formData, setFormData] = useState({
-    applicantName: "",
-    details: "",
-  });
+  const [formData, setFormData] = useState({ applicantName: "", details: "" });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
+
     const fetchApplication = async () => {
       try {
         const data = await getApplicationDetails(id);
         setFormData(data);
       } catch (error) {
         console.error("Failed to fetch application:", error);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchApplication();
   }, [id]);
 
@@ -40,36 +44,49 @@ const EditApplication = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Edit Application</h2>
-      <form onSubmit={handleSubmit} className="border p-4 rounded-lg shadow">
-        <label className="block mb-2">
-          Applicant Name:
-          <input
-            type="text"
-            name="applicantName"
-            value={formData.applicantName}
-            onChange={handleChange}
-            className="border p-2 w-full"
-          />
-        </label>
-        <label className="block mb-2">
-          Details:
-          <textarea
-            name="details"
-            value={formData.details}
-            onChange={handleChange}
-            className="border p-2 w-full"
-          />
-        </label>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-        >
-          Save
-        </button>
-      </form>
-    </div>
+    <Container style={{ margin: "300px auto" }}>
+      <h2 className="text-center mb-4">Edit Application</h2>
+      {loading ? (
+        <div className="text-center">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      ) : (
+        <Card className="shadow p-4">
+          <Card.Body>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group className="mb-3">
+                <Form.Label>Applicant Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="applicantName"
+                  value={formData.applicantName}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Details</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  name="details"
+                  rows={4}
+                  value={formData.details}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+
+              <Button variant="primary" type="submit" className="w-100">
+                Save Changes
+              </Button>
+            </Form>
+          </Card.Body>
+        </Card>
+      )}
+    </Container>
   );
 };
 

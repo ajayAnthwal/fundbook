@@ -39,11 +39,11 @@ const Slider = () => {
                   <h1 className="display-4 text-white mb-0">
                    MSME Loans, Simplified with AI & CA Experts!
                   </h1>
-                  <div class="button-container d-flex gap-3">
-                    <a class="btn btn-primary px-4 py-2" href="#">
+                  <div className="button-container d-flex gap-3">
+                    <a className="btn btn-primary px-4 py-2" href="#">
                       Apply Loan
                     </a>
-                    <a class="btn btn-secondary px-4 py-2" href="#">
+                    <a className="btn btn-secondary px-4 py-2" href="#">
                       Register
                     </a>
                   </div>
@@ -67,11 +67,11 @@ const Slider = () => {
                   <h2 className="display-4 text-white mb-0">
                   Your Trusted Partner for MSME Loans
                   </h2>
-                  <div class="button-container d-flex gap-3">
-                    <a class="btn btn-primary px-4 py-2" href="#">
+                  <div className="button-container d-flex gap-3">
+                    <a className="btn btn-primary px-4 py-2" href="#">
                       Apply Loan
                     </a>
-                    <a class="btn btn-secondary px-4 py-2" href="#">
+                    <a className="btn btn-secondary px-4 py-2" href="#">
                       Register
                     </a>
                   </div>
@@ -93,11 +93,11 @@ const Slider = () => {
                   <h2 className="display-4 text-white mb-0">
                   MSME Financing—From Application to Approval!
                   </h2>
-                  <div class="button-container d-flex gap-3">
-                    <a class="btn btn-primary px-4 py-2" href="#">
+                  <div className="button-container d-flex gap-3">
+                    <a className="btn btn-primary px-4 py-2" href="#">
                       Apply Loan
                     </a>
-                    <a class="btn btn-secondary px-4 py-2" href="#">
+                    <a className="btn btn-secondary px-4 py-2" href="#">
                       Register
                     </a>
                   </div>

@@ -1,13 +1,19 @@
 import Sidebar from "../components/Dashboard/Sidebar";
 import Navbar from "../components/Dashboard/Navbar";
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1">
+    <div className="d-flex vh-100">
+      {/* Sidebar with fixed width */}
+      <div className="bg-dark text-white p-3" style={{ width: "250px" }}>
+        <Sidebar />
+      </div>
+
+      {/* Main content area */}
+      <div className="flex-grow-1 d-flex flex-column">
         <Navbar />
-        <main className="p-4">{children}</main>
+        <main className="p-4 flex-grow-1 bg-light">{children}</main>
       </div>
     </div>
   );

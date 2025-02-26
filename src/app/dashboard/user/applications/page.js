@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getUserApplications } from "@/api/documents";
+import { Table, Button, Container } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const ApplicationsPage = () => {
   const [applications, setApplications] = useState([]);
@@ -18,42 +20,57 @@ const ApplicationsPage = () => {
   }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Your Loan Applications</h2>
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border p-2">Application ID</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Actions</th>
+    <Container style={{ margin: "300px auto" }}>
+      <h2 className="mb-4">Your Loan Applications</h2>
+      <Table striped bordered hover responsive>
+        <thead className="table-dark">
+          <tr>
+            <th className="text-white">Application ID</th>
+            <th className="text-white">Status</th>
+            <th className="text-white">Actions</th>
           </tr>
         </thead>
         <tbody>
           {applications.map((app) => (
-            <tr key={app.id} className="border">
-              <td className="border p-2">{app.id}</td>
-              <td className="border p-2">{app.status}</td>
-              <td className="border p-2">
-                <a
+            <tr key={app.id}>
+              <td>{app.id}</td>
+              <td>
+                <span
+                  className={`badge ${
+                    app.status === "approved"
+                      ? "bg-success"
+                      : app.status === "rejected"
+                      ? "bg-danger"
+                      : "bg-warning text-dark"
+                  }`}
+                >
+                  {app.status}
+                </span>
+              </td>
+              <td>
+                <Button
+                  variant="primary"
+                  size="sm"
                   href={`/user/applications/${app.id}`}
-                  className="text-blue-500 mr-2"
+                  className="me-2"
                 >
                   View
-                </a>
+                </Button>
                 {["pending", "under_review"].includes(app.status) && (
-                  <a
+                  <Button
+                    variant="warning"
+                    size="sm"
                     href={`/user/applications/edit/${app.id}`}
-                    className="text-green-500"
                   >
                     Edit
-                  </a>
+                  </Button>
                 )}
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+      </Table>
+    </Container>
   );
 };
 

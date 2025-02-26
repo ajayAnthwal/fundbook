@@ -10,7 +10,7 @@ const Disbursement = () => {
   };
 
   return (
-    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+    <div className="container mt-5">
       <h1 className="fs-4 fw-bold mb-4">🏦 Loan Disbursement</h1>
       <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow">
         <div className="mb-3">

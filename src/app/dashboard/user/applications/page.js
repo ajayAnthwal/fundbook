@@ -20,7 +20,7 @@ const ApplicationsPage = () => {
   }, []);
 
   return (
-    <Container style={{ margin: "300px auto" }}>
+    <Container>
       <h2 className="mb-4">Your Loan Applications</h2>
       <Table striped bordered hover responsive>
         <thead className="table-dark">

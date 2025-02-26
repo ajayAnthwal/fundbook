@@ -10,7 +10,7 @@ const ManageLoans = () => {
   };
 
   return (
-    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+    <div className="container mt-5">
       <h1 className="fs-4 fw-bold mb-4">🏦 Manage Loan Types</h1>
 
       <button onClick={addLoan} className="btn btn-success mb-3">

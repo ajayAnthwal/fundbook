@@ -10,7 +10,7 @@ const ManageBusiness = () => {
   };
 
   return (
-    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+    <div className="container mt-5">
       <h1 className="fs-4 fw-bold mb-4">🏢 Manage Business Types</h1>
 
       <button onClick={addBusiness} className="btn btn-success mb-3">

@@ -9,7 +9,6 @@ const Applications = () => {
   return (
     <div
       className="container-fluid px-4"
-      style={{ marginTop: "200px !important" }}
     >
       <h1 className="fs-4 fw-bold mb-4 text-center">
         📋 All Loan Applications

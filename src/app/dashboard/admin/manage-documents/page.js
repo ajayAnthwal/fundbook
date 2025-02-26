@@ -10,7 +10,7 @@ const ManageDocuments = () => {
   };
 
   return (
-    <div className="container mt-5" style={{ marginTop: "200px !important" }}>
+    <div className="container mt-5">
       <h1 className="fs-4 fw-bold mb-4">📄 Manage Documents</h1>
 
       <button onClick={addDocument} className="btn btn-success mb-3">

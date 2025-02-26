@@ -1,5 +1,6 @@
+"use client";
 import LoanForm from "@/app/components/Dashboard/LoanForm";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const ApplyLoan = () => {
   const router = useRouter();

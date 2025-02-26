@@ -1,5 +1,6 @@
+"use client";
 import { useEffect, useState } from "react";
-import { getUserProfile } from "@/api/api"; 
+import { getUserProfile } from "@/api/documents";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);

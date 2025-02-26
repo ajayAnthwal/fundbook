@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { getUserProfile, updateUserProfile } from "@/api/documents";
 

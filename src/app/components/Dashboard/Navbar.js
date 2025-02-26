@@ -14,7 +14,7 @@ const Navbar = ({ user }) => {
   return (
     <nav className="navbar navbar-dark bg-dark px-4">
       <div className="container-fluid d-flex justify-content-between align-items-center">
-        <span className="navbar-brand fs-4 fw-bold">📊 Dashboard</span>
+        <span className="navbar-brand fs-4 fw-bold invisible ">📊 Dashboard</span>
 
         <div className="d-flex align-items-center">
           {user && <span className="text-white me-3 fw-semibold">👤 {user.name}</span>}

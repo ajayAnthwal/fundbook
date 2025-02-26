@@ -6,7 +6,7 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="d-flex vh-100">
       {/* Sidebar with fixed width */}
-      <div className="bg-dark text-white p-3" style={{ width: "250px" }}>
+      <div className="text-white">
         <Sidebar />
       </div>
 

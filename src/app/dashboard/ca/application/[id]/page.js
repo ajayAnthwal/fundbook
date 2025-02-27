@@ -27,7 +27,7 @@ const ApplicationDetails = () => {
   }, [id]);
 
   return (
-    <Container style={{ margin: "300px auto" }}>
+    <Container>
       <h2 className="text-center mb-4">Application Details</h2>
       {loading ? (
         <div className="text-center">

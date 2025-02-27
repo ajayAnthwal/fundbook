@@ -10,7 +10,7 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [forgotPassword, setForgotPassword] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -18,26 +18,62 @@ export default function AuthPage() {
     reset,
   } = useForm();
 
+  // const onSubmit = async (data) => {
+  //   try {
+  //     setIsLoading(true);
+  //     if (isLogin) {
+  //       const response = await toast.promise(authAPI.login(data), {
+  //         loading: "Signing in...",
+  //         success: "Successfully signed in!",
+  //         error: (err) => err.message || "Failed to sign in",
+  //       });
+  //       router.push("/dashboard");
+  //     } else {
+  //       const response = await toast.promise(authAPI.register(data), {
+  //         loading: "Creating account...",
+  //         success: "Account created successfully!",
+  //         error: (err) => err.message || "Failed to create account",
+  //       });
+  //       router.push("/dashboard");
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
+      let response;
+
       if (isLogin) {
-        const response = await toast.promise(authAPI.login(data), {
+        response = await toast.promise(authAPI.login(data), {
           loading: "Signing in...",
           success: "Successfully signed in!",
           error: (err) => err.message || "Failed to sign in",
         });
-        router.push("/dashboard");
       } else {
-        const response = await toast.promise(authAPI.register(data), {
+        response = await toast.promise(authAPI.register(data), {
           loading: "Creating account...",
           success: "Account created successfully!",
           error: (err) => err.message || "Failed to create account",
         });
-        router.push("/dashboard");
+      }
+      console.log("Auth API Response:", response);
+      if (response?.token) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(response.user));
+          localStorage.setItem("token", response.token);
+          console.log("Token set successfully!");
+        }
+        // router.push("/dashboard");
+      } else {
+        toast.error("Token not received from API");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Auth Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +104,11 @@ export default function AuthPage() {
             <div className="card shadow-sm">
               <div className="card-body p-4 p-md-5">
                 <h2 className="text-center mb-4">
-                  {forgotPassword ? "Forgot Password" : isLogin ? "Sign In" : "Sign Up"}
+                  {forgotPassword
+                    ? "Forgot Password"
+                    : isLogin
+                    ? "Sign In"
+                    : "Sign Up"}
                 </h2>
 
                 {forgotPassword ? (
@@ -77,7 +117,9 @@ export default function AuthPage() {
                       <label className="form-label">Email</label>
                       <input
                         type="email"
-                        className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                        className={`form-control ${
+                          errors.email ? "is-invalid" : ""
+                        }`}
                         {...register("email", {
                           required: "Email is required",
                           pattern: {
@@ -86,12 +128,23 @@ export default function AuthPage() {
                           },
                         })}
                       />
-                      {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                      {errors.email && (
+                        <div className="invalid-feedback">
+                          {errors.email.message}
+                        </div>
+                      )}
                     </div>
-                    <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100"
+                      disabled={isLoading}
+                    >
                       {isLoading ? "Sending..." : "Send Reset Link"}
                     </button>
-                    <button className="btn btn-link w-100 mt-2" onClick={() => setForgotPassword(false)}>
+                    <button
+                      className="btn btn-link w-100 mt-2"
+                      onClick={() => setForgotPassword(false)}
+                    >
                       Back to Sign In
                     </button>
                   </form>
@@ -103,25 +156,43 @@ export default function AuthPage() {
                           <label className="form-label">First Name</label>
                           <input
                             type="text"
-                            className={`form-control ${errors.firstName ? "is-invalid" : ""}`}
+                            className={`form-control ${
+                              errors.firstName ? "is-invalid" : ""
+                            }`}
                             {...register("firstName", {
                               required: "First name is required",
-                              minLength: { value: 2, message: "At least 2 characters" },
+                              minLength: {
+                                value: 2,
+                                message: "At least 2 characters",
+                              },
                             })}
                           />
-                          {errors.firstName && <div className="invalid-feedback">{errors.firstName.message}</div>}
+                          {errors.firstName && (
+                            <div className="invalid-feedback">
+                              {errors.firstName.message}
+                            </div>
+                          )}
                         </div>
                         <div className="col-md-6 mb-3">
                           <label className="form-label">Last Name</label>
                           <input
                             type="text"
-                            className={`form-control ${errors.lastName ? "is-invalid" : ""}`}
+                            className={`form-control ${
+                              errors.lastName ? "is-invalid" : ""
+                            }`}
                             {...register("lastName", {
                               required: "Last name is required",
-                              minLength: { value: 2, message: "At least 2 characters" },
+                              minLength: {
+                                value: 2,
+                                message: "At least 2 characters",
+                              },
                             })}
                           />
-                          {errors.lastName && <div className="invalid-feedback">{errors.lastName.message}</div>}
+                          {errors.lastName && (
+                            <div className="invalid-feedback">
+                              {errors.lastName.message}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -130,7 +201,9 @@ export default function AuthPage() {
                       <label className="form-label">Email</label>
                       <input
                         type="email"
-                        className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                        className={`form-control ${
+                          errors.email ? "is-invalid" : ""
+                        }`}
                         {...register("email", {
                           required: "Email is required",
                           pattern: {
@@ -139,34 +212,67 @@ export default function AuthPage() {
                           },
                         })}
                       />
-                      {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                      {errors.email && (
+                        <div className="invalid-feedback">
+                          {errors.email.message}
+                        </div>
+                      )}
                     </div>
 
                     <div className="mb-3">
                       <label className="form-label">Password</label>
                       <input
                         type="password"
-                        className={`form-control ${errors.password ? "is-invalid" : ""}`}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
                         {...register("password", {
                           required: "Password is required",
-                          minLength: { value: 6, message: "At least 6 characters" },
+                          minLength: {
+                            value: 6,
+                            message: "At least 6 characters",
+                          },
                         })}
                       />
-                      {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
+                      {errors.password && (
+                        <div className="invalid-feedback">
+                          {errors.password.message}
+                        </div>
+                      )}
                     </div>
 
-                    <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
-                      {isLoading ? (isLogin ? "Signing in..." : "Signing up...") : isLogin ? "Sign In" : "Sign Up"}
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100"
+                      disabled={isLoading}
+                    >
+                      {isLoading
+                        ? isLogin
+                          ? "Signing in..."
+                          : "Signing up..."
+                        : isLogin
+                        ? "Sign In"
+                        : "Sign Up"}
                     </button>
                   </form>
                 )}
 
                 {!forgotPassword && (
                   <div className="text-center mt-3">
-                    <button className="btn btn-link" onClick={() => setIsLogin(!isLogin)} disabled={isLoading}>
-                      {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
+                    <button
+                      className="btn btn-link"
+                      onClick={() => setIsLogin(!isLogin)}
+                      disabled={isLoading}
+                    >
+                      {isLogin
+                        ? "Need an account? Sign up"
+                        : "Already have an account? Sign in"}
                     </button>
-                    <button className="btn btn-link" onClick={() => setForgotPassword(true)} disabled={isLoading}>
+                    <button
+                      className="btn btn-link"
+                      onClick={() => setForgotPassword(true)}
+                      disabled={isLoading}
+                    >
                       Forgot Password?
                     </button>
                   </div>

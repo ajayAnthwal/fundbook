@@ -1,14 +1,13 @@
 import axios from "axios";
 
-const BASE_URL = "http://172.105.61.88:3070";
+const BASE_URL = "http://194.195.112.4:3070";
 
 export const authAPI = {
   login: async (credentials) => {
     try {
-      // Ensure we're sending exactly what the API expects
       const loginData = {
         email: credentials.email,
-        password: credentials.password
+        password: credentials.password,
       };
 
       const response = await axios.post(
@@ -23,12 +22,11 @@ export const authAPI = {
 
   register: async (userData) => {
     try {
-      // Ensure we're sending exactly what the API expects
       const registerData = {
         email: userData.email,
         password: userData.password,
         firstName: userData.firstName,
-        lastName: userData.lastName
+        lastName: userData.lastName,
       };
 
       const response = await axios.post(

@@ -44,7 +44,7 @@ const EditApplication = () => {
   };
 
   return (
-    <Container style={{ margin: "300px auto" }}>
+    <Container>
       <h2 className="text-center mb-4">Edit Application</h2>
       {loading ? (
         <div className="text-center">

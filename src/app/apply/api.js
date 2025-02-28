@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const BASE_URL = "https://your-api-url.com"; 
+const BASE_URL = "http://194.195.112.4:3070";
 
 // 📌 1. GET Loan Types
 export const getLoanTypes = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/get-loan-types`);
+    const response = await axios.get(`${BASE_URL}/api/v1/loan-types`);
     return response.data;
   } catch (error) {
     console.error("Error fetching loan types:", error);
@@ -16,7 +16,7 @@ export const getLoanTypes = async () => {
 // 📌 2. Submit Loan Application
 export const submitLoanApplication = async (formData) => {
   try {
-    const response = await axios.post(`${BASE_URL}/submit-loan`, formData);
+    const response = await axios.post(`${BASE_URL}/api/v1/applications`, formData);
     return response.data;
   } catch (error) {
     console.error("Error submitting loan:", error);

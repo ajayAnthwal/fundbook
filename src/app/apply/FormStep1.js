@@ -1,13 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css"; 
+import "bootstrap/dist/css/bootstrap.min.css";
+import { getLoanTypes } from "./api";
 
 export default function FormStep1({ formData, setFormData, nextStep }) {
-  const [loanTypes, setLoanTypes] = useState([
-    { id: 1, name: "Personal Loan" },
-    { id: 2, name: "Business Loan" },
-    { id: 3, name: "Home Loan" },
-  ]); 
+  const [loanTypes, setLoanTypes] = useState([]);
+
+  useEffect(() => {
+    const fetchLoanTypes = async () => {
+      try {
+        const data = await getLoanTypes();
+        setLoanTypes(data);
+      } catch (error) {
+        console.error("Error fetching loan types:", error);
+      }
+    };
+
+    fetchLoanTypes();
+  }, []);
 
   return (
     <div>

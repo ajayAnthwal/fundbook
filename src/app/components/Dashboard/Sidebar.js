@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [role, setRole] = useState("Admin");
+  const [role, setRole] = useState("User");
 
   return (
     <div

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { getLoanTypes } from "./api";
+import { submitLoanApplication } from "./api";
 
 export default function FormStep1({ formData, setFormData, nextStep }) {
   const [loanTypes, setLoanTypes] = useState([]);
@@ -18,6 +19,28 @@ export default function FormStep1({ formData, setFormData, nextStep }) {
 
     fetchLoanTypes();
   }, []);
+
+  const handleSubmit = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem("user"));
+      const userId = userData?.id;
+      const applicationData = {
+        user: { id: userId },
+        status: "pending",
+        initiatedBy: "user",
+        ca: { id: userId },
+        amount: formData.amount,
+        loanType: { id: formData.loanType },
+        name: `${userData.firstName} ${userData.lastName}`,
+      };
+
+      const response = await submitLoanApplication(applicationData);
+      console.log("Loan Application Submitted:", response);
+      nextStep();
+    } catch (error) {
+      console.error("Error submitting loan application:", error);
+    }
+  };
 
   return (
     <div>
@@ -45,12 +68,15 @@ export default function FormStep1({ formData, setFormData, nextStep }) {
         >
           <option value="">Choose loan type</option>
           {loanTypes.map((type) => (
-            <option key={type.id} value={type.name}>
+            <option key={type.id} value={type.id}>
               {type.name}
             </option>
           ))}
         </select>
       </div>
+      <button className="btn btn-primary" onClick={handleSubmit}>
+        Submit
+      </button>
     </div>
   );
 }

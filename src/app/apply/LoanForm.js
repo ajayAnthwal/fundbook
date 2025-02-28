@@ -48,7 +48,7 @@ export default function LoanForm() {
             {/* Form Steps */}
             {step === 1 && (
               <FormStep1
-                formData={formData}
+                 formData={formData}
                 setFormData={setFormData}
                 nextStep={nextStep}
               />

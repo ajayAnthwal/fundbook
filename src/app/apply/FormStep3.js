@@ -1,9 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-export default function FormStep3({ formData, setFormData, nextStep, prevStep }) {
+export default function FormStep3({
+  formData,
+  setFormData,
+  nextStep,
+  prevStep,
+}) {
   const [kycList, setKycList] = useState(formData.kycList || []);
+
+  useEffect(() => {
+    if (!formData.applicationId) {
+      const savedApplicationId = localStorage.getItem("applicationId");
+      if (savedApplicationId) {
+        setFormData((prev) => ({ ...prev, applicationId: savedApplicationId }));
+      }
+    }
+  }, []);
 
   const addKycEntry = () => {
     setKycList([...kycList, { name: "", pan: "" }]);
@@ -22,9 +36,30 @@ export default function FormStep3({ formData, setFormData, nextStep, prevStep })
     setFormData({ ...formData, kycList: updatedKycList });
   };
 
+  const handleSubmit = async () => {
+    if (!formData.applicationId) {
+      console.error("Application ID is missing!");
+      return;
+    }
+
+    try {
+      const kycData = {
+        application: { id: formData.applicationId },
+        kycList: kycList,
+      };
+
+      console.log("Submitting KYC Data:", kycData);
+      nextStep();
+    } catch (error) {
+      console.error("Error submitting KYC details:", error);
+    }
+  };
+
   return (
     <div>
-      <h3 className="text-primary text-center mb-3">Step 3: Director/Proprietor/Partner KYC</h3>
+      <h3 className="text-primary text-center mb-3">
+        Step 3: Director/Proprietor/Partner KYC
+      </h3>
 
       {kycList.map((kyc, index) => (
         <div key={index} className="mb-3 p-3 border rounded bg-light">
@@ -51,7 +86,10 @@ export default function FormStep3({ formData, setFormData, nextStep, prevStep })
             />
           </div>
           {index > 0 && (
-            <button className="btn btn-danger btn-sm" onClick={() => removeKycEntry(index)}>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => removeKycEntry(index)}
+            >
               Remove
             </button>
           )}
@@ -60,6 +98,14 @@ export default function FormStep3({ formData, setFormData, nextStep, prevStep })
       <button className="btn btn-success btn-sm mb-3" onClick={addKycEntry}>
         + Add Person
       </button>
+      <div className="d-flex justify-content-between">
+        <button className="btn btn-secondary" onClick={prevStep}>
+          Back
+        </button>
+        <button className="btn btn-primary" onClick={handleSubmit}>
+          Submit KYC
+        </button>
+      </div>
     </div>
   );
 }

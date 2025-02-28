@@ -1,15 +1,59 @@
 import axios from "axios";
 
-const BASE_URL = "https://your-api-url.com"; // 🔹 सही API URL डालें
-
 // 📌 1. Get User Applications List
 export const getUserApplications = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/applications`);
-    return response.data;
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No token found!");
+
+    const response = await fetch(
+      "http://194.195.112.4:3070/api/v1/applications",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch applications");
+    }
+
+    return await response.json(); 
   } catch (error) {
-    console.error("Error fetching applications:", error);
-    throw error;
+    console.error("API Error:", error);
+    return [];
+  }
+};
+
+export const getApplicationDocuments = async (applicationId) => {
+  try {
+    const token = localStorage.getItem("authToken"); // Token check karein
+    if (!token) throw new Error("No token found!");
+
+    const response = await fetch(
+      `http://194.195.112.4:3070/api/v1/application-documents/${applicationId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch documents");
+    }
+
+    return await response.json(); // JSON data return karein
+  } catch (error) {
+    console.error("API Error:", error);
+    return [];
   }
 };
 
@@ -26,11 +70,26 @@ export const getApplicationById = async (id) => {
 
 export const getUserProfile = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/user/profile`);
-    return response.data;
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No token found!");
+
+    const response = await fetch(`http://194.195.112.4:3070/api/v1/auth/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch profile");
+    }
+
+    return await response.json();
   } catch (error) {
-    console.error("Error fetching profile:", error);
-    throw error;
+    console.error("API Error:", error);
+    return null;
   }
 };
 
@@ -41,16 +100,6 @@ export const updateUserProfile = async (profileData) => {
     return response.data;
   } catch (error) {
     console.error("Error updating profile:", error);
-    throw error;
-  }
-};
-
-export const getCAApplications = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/ca/applications`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching applications:", error);
     throw error;
   }
 };

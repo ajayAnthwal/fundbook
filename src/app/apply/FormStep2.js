@@ -1,5 +1,7 @@
 "use client";
+import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { businessdetails } from "./api";
 
 export default function FormStep2({
   formData,
@@ -7,6 +9,46 @@ export default function FormStep2({
   nextStep,
   prevStep,
 }) {
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user")) || {};
+    setUserId(userData.id);
+    const savedApplicationId = localStorage.getItem("applicationId");
+    if (savedApplicationId) {
+      setFormData((prev) => ({ ...prev, applicationId: savedApplicationId }));
+    }
+  }, []);
+
+  const handleSubmit = async () => {
+    try {
+      const businessData = {
+        email: formData.email || "",
+        mobile: formData.mobileNo || "",
+        businessType: { id: formData.businessType || "" },
+        gst: formData.gstNo || "",
+        udyam: formData.udyamNo || "",
+        application: { id: formData.applicationId || "" }, // Application ID भेजें
+      };
+
+      const response = await businessdetails(businessData);
+      console.log("Business Details Submitted:", response);
+
+      // ✅ Response से Application ID Save करें
+      if (response && response.application && response.application.id) {
+        localStorage.setItem("applicationId", response.application.id);
+        setFormData((prev) => ({
+          ...prev,
+          applicationId: response.application.id,
+        }));
+      }
+
+      nextStep();
+    } catch (error) {
+      console.error("Error submitting business details:", error);
+    }
+  };
+
   return (
     <div>
       <h3 className="text-primary text-center mb-3">
@@ -59,6 +101,15 @@ export default function FormStep2({
       <p className="text-danger small">
         * At least one of Udyam No., GST No., Mobile No., or Email is required.
       </p>
+
+      <div className="d-flex justify-content-between">
+        <button className="btn btn-secondary" onClick={prevStep}>
+          Back
+        </button>
+        <button className="btn btn-primary" onClick={handleSubmit}>
+          Submit
+        </button>
+      </div>
     </div>
   );
 }

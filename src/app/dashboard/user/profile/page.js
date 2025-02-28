@@ -18,7 +18,7 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
+    <div className="container d-flex justify-content-center align-items-center">
       <div className="card shadow-lg p-4" style={{ width: "100%", maxWidth: "500px" }}>
         <h2 className="text-center mb-4">Your Profile</h2>
         {profile ? (

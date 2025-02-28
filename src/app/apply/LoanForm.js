@@ -21,15 +21,11 @@ export default function LoanForm() {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const handleSubmit = async () => {
-    try {
-      const response = await submitLoanApplication(formData);
-      alert("Loan Application Submitted!");
-      console.log(response);
-    } catch (error) {
-      alert("Error submitting form.");
-    }
+  const handleSubmit = () => {
+    alert("Loan Application Submitted!");
+    console.log("Form Data:", formData);
   };
+  
 
   return (
     <div className="container mt-5">

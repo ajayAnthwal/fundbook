@@ -6,33 +6,76 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    setUser(userData);
-  }, []);
+  const [role, setRole] = useState("Admin");
 
   return (
     <div
       className="bg-white shadow-lg p-3"
       style={{ width: "250px", borderRadius: "15px" }}
     >
-      {user && (
+      {/* {user && (
         <div className="text-center mb-4">
-          <h4 className="mb-0">{user.firstName} {user.lastName}</h4>
+          <h4 className="mb-0">
+            {user.firstName} {user.lastName}
+          </h4>
           <p className="small">{user.email}</p>
         </div>
-      )}
+      )} */}
 
       <ul className="nav flex-column">
-        {/* USER ROLE */}
-        {user?.role?.name === "User" && (
+        {/* USER (MSME) ROLE */}
+        {role === "User" && (
           <>
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname.startsWith("/dashboard/user/applications") ? "active" : ""
+                  pathname.startsWith("/dashboard/user/applications")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/user/applications"
+              >
+                🏠 Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/user/profile") ? "active" : ""
+                }`}
+                href="/dashboard/user/profile"
+              >
+                👤 Profile
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/user/documents")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/user/documents"
+              >
+                📜 Documents
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/user/my-ca") ? "active" : ""
+                }`}
+                href="/dashboard/user/my-ca"
+              >
+                👨‍💼 My CA
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/user/applications")
+                    ? "active"
+                    : ""
                 }`}
                 href="/dashboard/user/applications"
               >
@@ -42,25 +85,69 @@ const Sidebar = () => {
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname.startsWith("/dashboard/user/apply-loan") ? "active" : ""
+                  pathname.startsWith("/apply") ? "active" : ""
                 }`}
-                href="/dashboard/user/apply-loan"
+                href="/apply"
               >
                 💰 Apply Loan
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/user/old-applications")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/user/oldapplications"
+              >
+                📂 Old Applications
               </Link>
             </li>
           </>
         )}
 
         {/* CA ROLE */}
-        {user?.role?.name === "CA" && (
+        {role === "CA" && (
           <>
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname.startsWith("/dashboard/ca/application") ? "active" : ""
+                  pathname.startsWith("/dashboard/ca/home") ? "active" : ""
                 }`}
-                href="/dashboard/ca/application"
+                href="/dashboard/ca/home"
+              >
+                🏠 Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/ca/profile") ? "active" : ""
+                }`}
+                href="/dashboard/ca/profile"
+              >
+                👤 Profile
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/ca/my-msme") ? "active" : ""
+                }`}
+                href="/dashboard/ca/my-msme"
+              >
+                🏢 My MSME
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/ca/application")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/ca/application/123"
               >
                 📑 Assigned Applications
               </Link>
@@ -68,33 +155,49 @@ const Sidebar = () => {
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname.startsWith("/dashboard/ca/application/[id]") ? "active" : ""
-                }`}
-                href="/dashboard/ca/application/123"
-              >
-                📝 View Application
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                className={`nav-link ${
-                  pathname.startsWith("/dashboard/ca/application/edit/[id]") ? "active" : ""
+                  pathname.startsWith("/dashboard/ca/application/edit")
+                    ? "active"
+                    : ""
                 }`}
                 href="/dashboard/ca/application/edit/123"
               >
                 ✏️ Edit Application
               </Link>
             </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/ca/sort-applications")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/ca/sort-applications"
+              >
+                🔄 Sort Applications
+              </Link>
+            </li>
           </>
         )}
 
         {/* ADMIN ROLE */}
-        {user?.role?.name === "Admin" && (
+        {role === "Admin" && (
           <>
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname === "/dashboard/admin/applications" ? "active" : ""
+                  pathname.startsWith("/dashboard/admin/home") ? "active" : ""
+                }`}
+                href="/dashboard/admin/home"
+              >
+                🏠 Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/applications")
+                    ? "active"
+                    : ""
                 }`}
                 href="/dashboard/admin/applications"
               >
@@ -104,11 +207,61 @@ const Sidebar = () => {
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname === "/dashboard/admin/manage-business" ? "active" : ""
+                  pathname.startsWith("/dashboard/admin/manage-users")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/manage-users"
+              >
+                👥 Manage Users
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/manage-business")
+                    ? "active"
+                    : ""
                 }`}
                 href="/dashboard/admin/manage-business"
               >
                 🏢 Manage Business
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/filter-applications")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/filter-applications"
+              >
+                🔍 Filter Applications
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/download-pdf")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/download-pdf"
+              >
+                📥 Download as PDF
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/final-decision")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/final-decision"
+              >
+                ✅ Final Decision
               </Link>
             </li>
           </>

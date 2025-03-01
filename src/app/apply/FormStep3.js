@@ -1,15 +1,15 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 
-const BASE_URL = 'http://194.195.112.4:3070';
+const BASE_URL = "http://194.195.112.4:3070";
 
 const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
   const [localFormData, setLocalFormData] = useState({
-    pan: '',
-    name: ''
+    pan: "",
+    name: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (formData) {
@@ -20,58 +20,60 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
+    setError("");
 
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error('Please login to submit KYC details');
+        throw new Error("Please login to submit KYC details");
       }
 
-      const applicationData = localStorage.getItem('applicationData');
+      const applicationData = localStorage.getItem("applicationData");
       if (!applicationData) {
-        throw new Error('Application data not found. Please complete previous steps first.');
+        throw new Error(
+          "Application data not found. Please complete previous steps first."
+        );
       }
 
       let applicationId;
       try {
         const parsedData = JSON.parse(applicationData);
         console.log("Parsed application data:", parsedData);
-        
+
         if (parsedData.id) {
           applicationId = parsedData.id;
         } else if (parsedData.application && parsedData.application.id) {
           applicationId = parsedData.application.id;
         } else {
-          throw new Error('Invalid application data structure');
+          throw new Error("Invalid application data structure");
         }
       } catch (e) {
-        console.error('Failed to parse application data:', e);
-        throw new Error('Invalid application data format');
+        console.error("Failed to parse application data:", e);
+        throw new Error("Invalid application data format");
       }
 
       if (!localFormData.pan || !localFormData.name) {
-        throw new Error('Please fill all required fields');
+        throw new Error("Please fill all required fields");
       }
 
       const kycData = {
-        pan: localFormData.pan.toUpperCase(), 
+        pan: localFormData.pan.toUpperCase(),
         name: localFormData.name,
         application: {
-          id: applicationId
-        }
+          id: applicationId,
+        },
       };
 
       console.log("Submitting KYC details:", kycData);
       console.log("API URL:", `${BASE_URL}/api/v1/application-kycs`);
 
       const response = await fetch(`${BASE_URL}/api/v1/application-kycs`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(kycData)
+        body: JSON.stringify(kycData),
       });
 
       console.log("Response Status:", response.status);
@@ -84,19 +86,13 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
         console.log("Parsed API Response:", responseData);
       } catch (e) {
         console.error("Failed to parse response:", e);
-        throw new Error('Invalid response from server');
+        throw new Error("Invalid response from server");
       }
-
       if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to submit KYC details');
+        throw new Error(responseData.message || "Failed to submit KYC details");
       }
-
       console.log("KYC details submitted successfully:", responseData);
-
-      // Save form data to localStorage
-      localStorage.setItem('kycData', JSON.stringify(responseData));
-
-      // Move to next step if available
+      localStorage.setItem("kycData", JSON.stringify(responseData));
       if (nextStep) {
         nextStep();
       }
@@ -123,7 +119,9 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
             <input
               type="text"
               value={localFormData.pan}
-              onChange={(e) => setLocalFormData({ ...localFormData, pan: e.target.value })}
+              onChange={(e) =>
+                setLocalFormData({ ...localFormData, pan: e.target.value })
+              }
               className="w-full p-2 border rounded"
               placeholder="Enter PAN Number"
               maxLength="10"
@@ -136,7 +134,9 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
             <input
               type="text"
               value={localFormData.name}
-              onChange={(e) => setLocalFormData({ ...localFormData, name: e.target.value })}
+              onChange={(e) =>
+                setLocalFormData({ ...localFormData, name: e.target.value })
+              }
               className="w-full p-2 border rounded"
               placeholder="Enter Full Name"
             />
@@ -155,7 +155,7 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
             disabled={submitting}
             className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-blue-300"
           >
-            {submitting ? 'Submitting...' : 'Submit KYC'}
+            {submitting ? "Submitting..." : "Submit KYC"}
           </button>
         </div>
       </form>

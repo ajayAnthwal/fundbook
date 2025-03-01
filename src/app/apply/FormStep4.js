@@ -3,7 +3,12 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { uploadDocument, saveDocument } from "./api";
 
-export default function FormStep4({ formData, setFormData, prevStep, submitForm }) {
+export default function FormStep4({
+  formData,
+  setFormData,
+  prevStep,
+  submitForm,
+}) {
   const [category, setCategory] = useState("Business Docs");
   const [uploading, setUploading] = useState(false);
 
@@ -136,8 +141,6 @@ export default function FormStep4({ formData, setFormData, prevStep, submitForm 
           </li>
         ))}
       </ul>
-
-      {/* Submit Button */}
       <button className="btn btn-primary mt-4" onClick={handleSubmitForm}>
         Submit Loan Application
       </button>

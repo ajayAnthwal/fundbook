@@ -6,14 +6,14 @@ export const authAPI = {
   login: async (credentials) => {
     try {
       const response = await fetch(`${BASE_URL}/api/v1/auth/email/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: credentials.email,
-          password: credentials.password
-        })
+          password: credentials.password,
+        }),
       });
 
       if (!response.ok) {
@@ -23,10 +23,9 @@ export const authAPI = {
 
       const data = await response.json();
       if (data.token) {
-        localStorage.setItem('authToken', data.token);
-        // Store user data
+        localStorage.setItem("authToken", data.token);
         if (data.user) {
-          localStorage.setItem('userData', JSON.stringify(data.user));
+          localStorage.setItem("userData", JSON.stringify(data.user));
         }
       }
       return data;

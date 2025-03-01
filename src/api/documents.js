@@ -11,9 +11,9 @@ export const getUserApplications = async () => {
     const response = await fetch(`${BASE_URL}/api/v1/applications`, {
       method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {
@@ -40,9 +40,9 @@ export const getApplicationDocuments = async (page = 1, limit = 10) => {
       {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -69,9 +69,9 @@ export const getApplicationById = async (id) => {
     const response = await fetch(`${BASE_URL}/api/v1/applications/${id}`, {
       method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {
@@ -96,9 +96,9 @@ export const getUserProfile = async () => {
     const response = await fetch(`${BASE_URL}/api/v1/auth/me`, {
       method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {
@@ -161,9 +161,9 @@ export const getDocumentById = async (documentId) => {
       {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -192,9 +192,9 @@ export const viewDocument = async (documentId) => {
       {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 

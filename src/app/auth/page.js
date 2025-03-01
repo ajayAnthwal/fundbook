@@ -18,31 +18,6 @@ export default function AuthPage() {
     reset,
   } = useForm();
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     setIsLoading(true);
-  //     if (isLogin) {
-  //       const response = await toast.promise(authAPI.login(data), {
-  //         loading: "Signing in...",
-  //         success: "Successfully signed in!",
-  //         error: (err) => err.message || "Failed to sign in",
-  //       });
-  //       router.push("/dashboard");
-  //     } else {
-  //       const response = await toast.promise(authAPI.register(data), {
-  //         loading: "Creating account...",
-  //         success: "Account created successfully!",
-  //         error: (err) => err.message || "Failed to create account",
-  //       });
-  //       router.push("/dashboard");
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
@@ -262,7 +237,8 @@ export default function AuthPage() {
                     <button
                       className="btn btn-link"
                       onClick={() => setIsLogin(!isLogin)}
-                      disabled={isLoading}z
+                      disabled={isLoading}
+                      z
                     >
                       {isLogin
                         ? "Need an account? Sign up"

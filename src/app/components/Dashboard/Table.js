@@ -1,4 +1,4 @@
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap
+import "bootstrap/dist/css/bootstrap.min.css"; 
 
 const Table = ({ data, columns }) => {
   return (
@@ -20,7 +20,7 @@ const Table = ({ data, columns }) => {
                 <tr key={index}>
                   {columns.map((col) => (
                     <td key={col} className="text-center">
-                      {row[col] || "N/A"} {/* Handle missing data */}
+                      {row[col] || "N/A"} 
                     </td>
                   ))}
                 </tr>

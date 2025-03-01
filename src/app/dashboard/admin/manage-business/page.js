@@ -1,8 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ManageBusiness = () => {
-  const [businessTypes, setBusinessTypes] = useState(["Retail", "Manufacturing"]);
+  const [businessTypes, setBusinessTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBusinessTypes();
+  }, []);
+
+  const fetchBusinessTypes = async () => {
+    try {
+      const response = await fetch("/api/v1/business-details?page=1&limit=10");
+      const data = await response.json();
+
+      if (data?.data) {
+        const extractedTypes = data.data.map((item) => item.businessType.name);
+        setBusinessTypes(extractedTypes);
+      }
+    } catch (error) {
+      console.error("Error fetching business types:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addBusiness = () => {
     const name = prompt("Enter new Business Type:");
@@ -17,11 +38,21 @@ const ManageBusiness = () => {
         ➕ Add Business Type
       </button>
 
-      <ul className="list-group">
-        {businessTypes.map((b, index) => (
-          <li key={index} className="list-group-item">{b}</li>
-        ))}
-      </ul>
+      {loading ? (
+        <p>Loading business types...</p>
+      ) : (
+        <ul className="list-group">
+          {businessTypes.length > 0 ? (
+            businessTypes.map((b, index) => (
+              <li key={index} className="list-group-item">
+                {b}
+              </li>
+            ))
+          ) : (
+            <li className="list-group-item">No Business Types Found</li>
+          )}
+        </ul>
+      )}
     </div>
   );
 };

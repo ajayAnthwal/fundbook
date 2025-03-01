@@ -262,7 +262,7 @@ export default function AuthPage() {
                     <button
                       className="btn btn-link"
                       onClick={() => setIsLogin(!isLogin)}
-                      disabled={isLoading}
+                      disabled={isLoading}z
                     >
                       {isLogin
                         ? "Need an account? Sign up"

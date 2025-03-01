@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import { Toaster } from "react-hot-toast";
 import Script from "next/script";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./components/ui/Header";
 import Footer from "./components/ui/Footer";

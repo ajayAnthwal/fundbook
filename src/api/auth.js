@@ -5,18 +5,33 @@ const BASE_URL = "http://194.195.112.4:3070";
 export const authAPI = {
   login: async (credentials) => {
     try {
-      const loginData = {
-        email: credentials.email,
-        password: credentials.password,
-      };
+      const response = await fetch(`${BASE_URL}/api/v1/auth/email/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password
+        })
+      });
 
-      const response = await axios.post(
-        `${BASE_URL}/api/v1/auth/email/login`,
-        loginData
-      );
-      return response.data;
+      if (!response.ok) {
+        const error = await response.json();
+        throw error;
+      }
+
+      const data = await response.json();
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+        // Store user data
+        if (data.user) {
+          localStorage.setItem('userData', JSON.stringify(data.user));
+        }
+      }
+      return data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw error;
     }
   },
 

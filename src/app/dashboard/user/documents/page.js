@@ -1,9 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { getApplicationDocuments, viewDocument } from "@/api/documents";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { getDocumentsById } from "@/api/documents";
 
 const DocumentsPage = () => {
+  const searchParams = useSearchParams();
+  const documentId = searchParams.get("id");
+
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,30 +20,20 @@ const DocumentsPage = () => {
 
   useEffect(() => {
     fetchDocuments();
-  }, [page]);
+  }, [page, documentId]);
 
   const fetchDocuments = async () => {
+    if (!documentId) return;
     try {
       setLoading(true);
-      const data = await getApplicationDocuments(page, limit);
-      if (data && data.data) {
-        if (page === 1) {
-          setDocuments(data.data);
-        } else {
-          setDocuments(prev => [...prev, ...data.data]);
-        }
-        setHasMore(data.data.length === limit);
+      const data = await getDocumentsById(documentId);
+      if (data) {
+        setDocuments(data);
         setError("");
       }
     } catch (err) {
       console.error("Documents Error:", err);
-      if (err.message === "No token found!") {
-        setError("Please login to view your documents");
-      } else if (err.status === 401) {
-        setError("Session expired. Please login again.");
-      } else {
-        setError(err.message || "Failed to load documents");
-      }
+      setError(err.message || "Failed to load documents");
     } finally {
       setLoading(false);
     }
@@ -50,7 +45,7 @@ const DocumentsPage = () => {
       setSelectedDoc(doc);
       const data = await viewDocument(doc.id);
       if (data && data.viewUrl) {
-        window.open(data.viewUrl, '_blank');
+        window.open(data.viewUrl, "_blank");
       }
     } catch (err) {
       console.error("View Document Error:", err);
@@ -62,49 +57,40 @@ const DocumentsPage = () => {
 
   const loadMore = () => {
     if (!loading && hasMore) {
-      setPage(prev => prev + 1);
+      setPage((prev) => prev + 1);
     }
   };
 
   const getFileIcon = (path) => {
-    const ext = path.split('.').pop().toLowerCase();
+    const ext = path.split(".").pop().toLowerCase();
     switch (ext) {
-      case 'pdf':
-        return '📄';
-      case 'doc':
-      case 'docx':
-        return '📝';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-        return '🖼️';
+      case "pdf":
+        return "📄";
+      case "doc":
+      case "docx":
+        return "📝";
+      case "jpg":
+      case "jpeg":
+      case "png":
+        return "🖼️";
       default:
-        return '📎';
+        return "📎";
     }
   };
 
   if (loading && page === 1) {
     return (
-      <div className="container mt-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status"></div>
-          <p className="mt-2">Loading documents...</p>
-        </div>
+      <div className="container mt-4 text-center">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p className="mt-2">Loading documents...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mt-4">
-        <div className="alert alert-danger text-center">
-          {error}
-          {(error.includes("Please login") || error.includes("Session expired")) && (
-            <div className="mt-3">
-              <a href="/auth" className="btn btn-primary">Go to Login</a>
-            </div>
-          )}
-        </div>
+      <div className="container mt-4 text-center">
+        <div className="alert alert-danger">{error}</div>
       </div>
     );
   }
@@ -123,7 +109,7 @@ const DocumentsPage = () => {
                     <div className="d-flex align-items-center mb-3">
                       <span className="fs-3 me-2">{getFileIcon(doc.path)}</span>
                       <h5 className="card-title mb-0 text-truncate">
-                        {doc.name || doc.path.split('/').pop()}
+                        {doc.name || doc.path.split("/").pop()}
                       </h5>
                     </div>
                     {doc.type && (
@@ -132,20 +118,25 @@ const DocumentsPage = () => {
                       </p>
                     )}
                     <p className="card-text">
-                      <small className="text-muted">Status: {doc.status || 'Active'}</small>
+                      <small className="text-muted">
+                        Status: {doc.status || "Active"}
+                      </small>
                     </p>
-                    <button 
+                    <button
                       onClick={() => handleViewDocument(doc)}
                       className="btn btn-primary btn-sm"
                       disabled={viewLoading && selectedDoc?.id === doc.id}
                     >
                       {viewLoading && selectedDoc?.id === doc.id ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                          ></span>
                           Loading...
                         </>
                       ) : (
-                        'View Document'
+                        "View Document"
                       )}
                     </button>
                   </div>
@@ -154,20 +145,23 @@ const DocumentsPage = () => {
             ))}
           </div>
 
-          {hasMore && (
+          {!documentId && hasMore && (
             <div className="text-center mt-4">
-              <button 
-                className="btn btn-outline-primary" 
+              <button
+                className="btn btn-outline-primary"
                 onClick={loadMore}
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                    ></span>
                     Loading...
                   </>
                 ) : (
-                  'Load More'
+                  "Load More"
                 )}
               </button>
             </div>

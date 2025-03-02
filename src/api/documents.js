@@ -2,41 +2,65 @@ import axios from "axios";
 
 const BASE_URL = "http://194.195.112.4:3070";
 
-// 📌 1. Get User Applications List
-export const getUserApplications = async () => {
+// 📌 1. Get User Applications List (Using Axios)
+export const getUserApplications = async (id) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("No token found!");
 
-    const response = await fetch(`${BASE_URL}/api/v1/applications`, {
-      method: "GET",
+    let url = `${BASE_URL}/api/v1/applications`;
+    if (id) url += `/${id}`;
+
+    const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw error;
-    }
-
-    const data = await response.json();
-    console.log("Applications data:", data);
-    return data;
+    console.log("Applications data:", response.data);
+    return response.data.data; // Ensure we return the correct data
   } catch (error) {
     console.error("Applications Error:", error);
-    throw error;
+    throw error.response?.data || error.message || "Something went wrong!";
   }
 };
 
-export const getApplicationDocuments = async (page = 1, limit = 10) => {
+export const getApplicationDocuments = async (
+  id = null,
+  page = 1,
+  limit = 10
+) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No token found!");
+
+    let url = `${BASE_URL}/api/v1/application-documents`;
+    if (id) url += `/${id}`;
+
+    const response = await axios.get(url, {
+      params: id ? {} : { page, limit },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Documents data:", response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error("Documents Error:", error);
+    throw error.response?.data || error.message || "Something went wrong!";
+  }
+};
+
+export const getDocumentsById = async (id) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("No token found!");
 
     const response = await fetch(
-      `${BASE_URL}/api/v1/application-documents?page=${page}&limit=${limit}`,
+      `${BASE_URL}/api/v1/application-documents/${id}`,
       {
         method: "GET",
         headers: {
@@ -52,10 +76,10 @@ export const getApplicationDocuments = async (page = 1, limit = 10) => {
     }
 
     const data = await response.json();
-    console.log("Documents data:", data);
+    console.log("Application details:", data);
     return data;
   } catch (error) {
-    console.error("Documents Error:", error);
+    console.error("Application details Error:", error);
     throw error;
   }
 };

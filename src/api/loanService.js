@@ -39,3 +39,14 @@ export const getBusinessTypes = async() =>{
 }
 
 
+export const getMyApplication = async (id) => {
+    try {
+      const res = await axiosClientWithHeaders.get(`/api/v1/applications/${id}`);
+      return res.data;
+    } catch (error) {
+      console.log('error', error);
+      toast.error(error.response?.data?.message || "Unable to fetch application");
+      return new Error(error.response?.data?.message);
+    }
+  };
+  

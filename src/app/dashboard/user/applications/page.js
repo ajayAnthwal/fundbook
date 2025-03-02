@@ -23,13 +23,7 @@ const ApplicationsPage = () => {
       }
     } catch (err) {
       console.error("Applications Error:", err);
-      if (err.message === "No token found!") {
-        setError("Please login to view your applications");
-      } else if (err.status === 401) {
-        setError("Session expired. Please login again.");
-      } else {
-        setError(err.message || "Failed to load applications");
-      }
+      setError(err.message || "Failed to load applications");
     } finally {
       setLoading(false);
     }
@@ -39,33 +33,28 @@ const ApplicationsPage = () => {
     try {
       setLoading(true);
       const data = await getApplicationById(id);
-      if (data) {
-        setSelectedApp(data);
-        setError("");
-      }
+      setSelectedApp(data);
     } catch (err) {
       console.error("Application Details Error:", err);
-      setError(err.message || "Failed to load application details");
+      setError(err.message || "Failed to load details");
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   if (loading) {
     return (
-      <div className="container mt-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status"></div>
-          <p className="mt-2">Loading applications...</p>
-        </div>
+      <div className="container mt-4 text-center">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p>Loading applications...</p>
       </div>
     );
   }
@@ -73,14 +62,7 @@ const ApplicationsPage = () => {
   if (error) {
     return (
       <div className="container mt-4">
-        <div className="alert alert-danger text-center">
-          {error}
-          {(error.includes("Please login") || error.includes("Session expired")) && (
-            <div className="mt-3">
-              <a href="/auth" className="btn btn-primary">Go to Login</a>
-            </div>
-          )}
-        </div>
+        <div className="alert alert-danger text-center">{error}</div>
       </div>
     );
   }
@@ -89,66 +71,58 @@ const ApplicationsPage = () => {
     <div className="container mt-4">
       <h2 className="mb-4">Your Applications</h2>
       
-      <div className="row">
-        <div className="col-md-6">
-          <div className="list-group">
+      <div className="table-responsive">
+        <table className="table table-striped table-hover">
+          <thead className="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Applicant Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
             {applications.length > 0 ? (
-              applications.map((app) => (
-                <button
-                  key={app.id}
-                  className={`list-group-item list-group-item-action ${selectedApp?.id === app.id ? 'active' : ''}`}
-                  onClick={() => viewApplicationDetails(app.id)}
-                >
-                  <div className="d-flex w-100 justify-content-between">
-                    <h5 className="mb-1">{app.user?.firstName} {app.user?.lastName}</h5>
-                    <small>{formatDate(app.createdAt)}</small>
-                  </div>
-                  <p className="mb-1">Status: <span className="badge bg-info">{app.status?.name || 'Processing'}</span></p>
-                  <small>Application ID: {app.id}</small>
-                </button>
+              applications.map((app, index) => (
+                <tr key={app.id}>
+                  <td>{index + 1}</td>
+                  <td>{app.user?.firstName} {app.user?.lastName}</td>
+                  <td>{app.user?.email}</td>
+                  <td><span className="badge bg-info">{app.status?.name || 'Processing'}</span></td>
+                  <td>{formatDate(app.createdAt)}</td>
+                  <td>
+                    <button className="btn btn-sm btn-primary" onClick={() => viewApplicationDetails(app.id)}>
+                      View Details
+                    </button>
+                  </td>
+                </tr>
               ))
             ) : (
-              <div className="alert alert-info">No applications found</div>
+              <tr>
+                <td colSpan="6" className="text-center">No applications found</td>
+              </tr>
             )}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedApp && (
+        <div className="card mt-4">
+          <div className="card-header">Application Details</div>
+          <div className="card-body">
+            <h6>Applicant Information</h6>
+            <p><strong>Name:</strong> {selectedApp.user?.firstName} {selectedApp.user?.lastName}</p>
+            <p><strong>Email:</strong> {selectedApp.user?.email}</p>
+            <p><strong>Phone:</strong> {selectedApp.user?.phone || 'N/A'}</p>
+            <h6>Status</h6>
+            <p><strong>Status:</strong> {selectedApp.status?.name || 'Processing'}</p>
+            <p><strong>Created:</strong> {formatDate(selectedApp.createdAt)}</p>
+            <p><strong>Last Updated:</strong> {formatDate(selectedApp.updatedAt)}</p>
           </div>
         </div>
-
-        <div className="col-md-6">
-          {selectedApp ? (
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Application Details</h5>
-              </div>
-              <div className="card-body">
-                <h6>Applicant Information</h6>
-                <ul className="list-unstyled">
-                  <li><strong>Name:</strong> {selectedApp.user?.firstName} {selectedApp.user?.lastName}</li>
-                  <li><strong>Email:</strong> {selectedApp.user?.email}</li>
-                  <li><strong>Phone:</strong> {selectedApp.user?.phone || 'N/A'}</li>
-                </ul>
-
-                <h6 className="mt-4">Application Status</h6>
-                <ul className="list-unstyled">
-                  <li><strong>Status:</strong> {selectedApp.status?.name || 'Processing'}</li>
-                  <li><strong>Created:</strong> {formatDate(selectedApp.createdAt)}</li>
-                  <li><strong>Last Updated:</strong> {formatDate(selectedApp.updatedAt)}</li>
-                </ul>
-
-                {selectedApp.role && (
-                  <>
-                    <h6 className="mt-4">Role Information</h6>
-                    <ul className="list-unstyled">
-                      <li><strong>Role:</strong> {selectedApp.role.name}</li>
-                    </ul>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="alert alert-info">Select an application to view details</div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

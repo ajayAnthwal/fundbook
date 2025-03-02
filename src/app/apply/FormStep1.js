@@ -1,4 +1,5 @@
 "use client";
+import { createApplication, getLoanTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 
 const BASE_URL = "http://194.195.112.4:3070";
@@ -98,6 +99,8 @@ const formStyles = {
 export default function FormStep1({ formData, updateFormData, nextStep }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [loanTypes, setLoanType] = useState([]);
+
   const [localFormData, setLocalFormData] = useState({
     name: "",
     loanType: "",
@@ -111,6 +114,15 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       setLocalFormData(formData);
     }
   }, [formData]);
+
+  useEffect(()=>{
+    (async function() {
+      const data = await getLoanTypes()
+      if(data){
+        setLoanType(data?.data);
+      }
+    })()
+  },[])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -150,23 +162,28 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       console.log("Submitting application:", applicationData);
       console.log("API URL:", `${BASE_URL}/api/v1/applications`);
 
-      const response = await fetch(`${BASE_URL}/api/v1/applications`, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(applicationData),
-      });
+      const res = await createApplication(applicationData);
 
-      console.log("Response Status:", response.status);
-      const responseData = await response.json();
-      console.log("API Response:", responseData);
+      // const response = await fetch(`${BASE_URL}/api/v1/applications`, {
+      //   method: "POST",
+      //   headers: headers,
+      //   body: JSON.stringify(applicationData),
+      // });
 
-      if (!response.ok) {
-        throw new Error(responseData.message || "Failed to submit application");
-      }
 
-      localStorage.setItem("applicationData", JSON.stringify(responseData));
-      if (nextStep) {
-        nextStep();
+      // console.log("Response Status:", response.status);
+      // const responseData = await response.json();
+      // console.log("API Response:", responseData);
+
+      // if (!response.ok) {
+      //   throw new Error(responseData.message || "Failed to submit application");
+      // }
+
+      if(res){
+        localStorage.setItem("applicationData", JSON.stringify(res));
+        if (nextStep) {
+          nextStep();
+        }
       }
     } catch (err) {
       console.error("Application Submit Error:", err);
@@ -238,7 +255,7 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
                   required
                 >
                   <option value="">Select Loan Type</option>
-                  {LOAN_TYPES.map((type) => (
+                  {loanTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}
                     </option>

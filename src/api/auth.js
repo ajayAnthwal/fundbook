@@ -1,34 +1,26 @@
 import axios from "axios";
+import { axiosClient } from "./config";
 
 const BASE_URL = "http://194.195.112.4:3070";
 
 export const authAPI = {
   login: async (credentials) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/v1/auth/email/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: credentials.email,
-          password: credentials.password,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
+      const res = await axiosClient.post('/auth/email/login', credentials);
+      
+      if (!res.data.token) {
+        // const error = await response.json();
         throw error;
       }
 
-      const data = await response.json();
+      const data = res.data;
       if (data.token) {
         localStorage.setItem("authToken", data.token);
         if (data.user) {
           localStorage.setItem("userData", JSON.stringify(data.user));
         }
       }
-      return data;
+      return res.data;
     } catch (error) {
       throw error;
     }
@@ -41,10 +33,11 @@ export const authAPI = {
         password: userData.password,
         firstName: userData.firstName,
         lastName: userData.lastName,
+        // TODO: mobile is required so add
       };
 
-      const response = await axios.post(
-        `${BASE_URL}/api/v1/auth/email/register`,
+      const response = await axiosClient.post(
+        `/auth/email/register`,
         registerData
       );
       return response.data;
@@ -55,8 +48,8 @@ export const authAPI = {
 
   forgotPassword: async (email) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/v1/auth/forgot-password`,
+      const response = await axiosClient.post(
+        `/auth/forgot-password`,
         { email }
       );
       return response.data;

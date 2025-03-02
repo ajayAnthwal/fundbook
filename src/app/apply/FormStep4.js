@@ -2,6 +2,7 @@
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { uploadDocument, saveDocument } from "./api";
+import { fileUploadService, saveApplicationDocumentService } from "@/api/fileService";
 
 export default function FormStep4({
   formData,
@@ -25,7 +26,8 @@ export default function FormStep4({
     try {
       console.log("Uploading file:", file.name);
 
-      const uploadResponse = await uploadDocument(file);
+      // const uploadResponse = await uploadDocument(file);
+      const uploadResponse = await fileUploadService(file);
       console.log("Upload Response:", uploadResponse);
 
       if (!uploadResponse?.file?.id || !uploadResponse?.file?.path) {
@@ -45,7 +47,8 @@ export default function FormStep4({
       };
 
       console.log("Saving document with data:", documentData);
-      const saveResponse = await saveDocument(documentData);
+      const saveResponse = await saveApplicationDocumentService(documentData);
+      // const saveResponse = await saveDocument(documentData);
       console.log("Document saved successfully:", saveResponse);
 
       const newDocument = {

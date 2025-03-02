@@ -1,4 +1,5 @@
 "use client";
+import { getBusinessTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 
 const BASE_URL = "http://194.195.112.4:3070";
@@ -94,6 +95,7 @@ export default function FormStep2({
 }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [businessTypes, setBusinessTypes] = useState([]);
   const [localFormData, setLocalFormData] = useState({
     email: "",
     mobile: "",
@@ -131,6 +133,13 @@ export default function FormStep2({
       }
     }
   }, [formData]);
+
+  useEffect(()=>{
+    (async function(){
+      const res = await getBusinessTypes();
+      setBusinessTypes(res?.data);
+    })()
+  },[])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -329,7 +338,7 @@ export default function FormStep2({
                   required
                 >
                   <option value="">Select Business Type</option>
-                  {BUSINESS_TYPES.map((type) => (
+                  {businessTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}
                     </option>

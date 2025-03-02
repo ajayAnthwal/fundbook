@@ -2,17 +2,6 @@
 import { createApplication, getLoanTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 
-const BASE_URL = "http://194.195.112.4:3070";
-
-// Hardcoded loan types
-const LOAN_TYPES = [
-  { id: "PERSONAL", name: "Personal Loan" },
-  { id: "BUSINESS", name: "Business Loan" },
-  { id: "HOME", name: "Home Loan" },
-  { id: "EDUCATION", name: "Education Loan" },
-  { id: "VEHICLE", name: "Vehicle Loan" },
-];
-
 const formStyles = {
   container: {
     maxWidth: "1200px",
@@ -54,14 +43,6 @@ const formStyles = {
     border: "1px solid #ccc",
     borderRadius: "4px",
     height: "50px",
-  },
-  textarea: {
-    width: "100%",
-    padding: "0.75rem",
-    fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    minHeight: "100px",
   },
   button: {
     width: "100%",
@@ -105,8 +86,6 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     name: "",
     loanType: "",
     amount: "",
-    phone: "",
-    address: "",
   });
 
   useEffect(() => {
@@ -115,14 +94,14 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     }
   }, [formData]);
 
-  useEffect(()=>{
-    (async function() {
-      const data = await getLoanTypes()
-      if(data){
+  useEffect(() => {
+    (async function () {
+      const data = await getLoanTypes();
+      if (data) {
         setLoanType(data?.data);
       }
-    })()
-  },[])
+    })();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -138,19 +117,6 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     setError("");
 
     try {
-      const token = localStorage.getItem("authToken");
-      console.log("Auth Token:", token ? "Present" : "Missing");
-
-      if (!token) {
-        throw new Error("Please login to submit application");
-      }
-
-      // Log headers for debugging
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-      console.log("Request Headers:", headers);
       const applicationData = {
         amount: Number(localFormData.amount),
         loanType: {
@@ -159,27 +125,8 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
         name: localFormData.name,
       };
 
-      console.log("Submitting application:", applicationData);
-      console.log("API URL:", `${BASE_URL}/api/v1/applications`);
-
       const res = await createApplication(applicationData);
-
-      // const response = await fetch(`${BASE_URL}/api/v1/applications`, {
-      //   method: "POST",
-      //   headers: headers,
-      //   body: JSON.stringify(applicationData),
-      // });
-
-
-      // console.log("Response Status:", response.status);
-      // const responseData = await response.json();
-      // console.log("API Response:", responseData);
-
-      // if (!response.ok) {
-      //   throw new Error(responseData.message || "Failed to submit application");
-      // }
-
-      if(res){
+      if (res) {
         localStorage.setItem("applicationData", JSON.stringify(res));
         if (nextStep) {
           nextStep();
@@ -198,29 +145,7 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       <div style={formStyles.card}>
         <h3 style={formStyles.title}>Loan Application - Step 1</h3>
 
-        {error && (
-          <div style={formStyles.error}>
-            {error}
-            {(error.includes("Please login") ||
-              error.includes("Session expired") ||
-              error.includes("No token found") ||
-              error.includes("User data not found")) && (
-              <div style={{ marginTop: "1rem" }}>
-                <a
-                  href="/auth"
-                  style={{
-                    ...formStyles.button,
-                    display: "inline-block",
-                    width: "auto",
-                    padding: "0.5rem 1rem",
-                  }}
-                >
-                  Go to Login
-                </a>
-              </div>
-            )}
-          </div>
-        )}
+        {error && <div style={formStyles.error}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div style={formStyles.row}>
@@ -255,83 +180,32 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
                   required
                 >
                   <option value="">Select Loan Type</option>
-                  {loanTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.name}
-                    </option>
-                  ))}
+                  {loanTypes &&
+                    loanTypes.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
           </div>
 
-          <div style={formStyles.row}>
-            <div style={formStyles.col}>
-              <div style={formStyles.formGroup}>
-                <label style={formStyles.label} htmlFor="amount">
-                  Loan Amount
-                </label>
-                <div style={{ position: "relative" }}>
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      fontSize: "1rem",
-                    }}
-                  >
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    style={{ ...formStyles.input, paddingLeft: "30px" }}
-                    id="amount"
-                    name="amount"
-                    value={localFormData.amount}
-                    onChange={handleChange}
-                    required
-                    min="1"
-                    placeholder="Enter loan amount"
-                  />
-                </div>
-              </div>
-            </div>
-            <div style={formStyles.col}>
-              <div style={formStyles.formGroup}>
-                <label style={formStyles.label} htmlFor="phone">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  style={formStyles.input}
-                  id="phone"
-                  name="phone"
-                  value={localFormData.phone}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter phone number"
-                  pattern="[0-9]{10}"
-                  maxLength="10"
-                />
-              </div>
-            </div>
-          </div>
-
           <div style={formStyles.formGroup}>
-            <label style={formStyles.label} htmlFor="address">
-              Address
+            <label style={formStyles.label} htmlFor="amount">
+              Loan Amount
             </label>
-            <textarea
-              style={formStyles.textarea}
-              id="address"
-              name="address"
-              value={localFormData.address}
+            <input
+              type="number"
+              style={formStyles.input}
+              id="amount"
+              name="amount"
+              value={localFormData.amount}
               onChange={handleChange}
-              rows="3"
               required
-              placeholder="Enter your address"
-            ></textarea>
+              min="1"
+              placeholder="Enter loan amount"
+            />
           </div>
 
           <div style={{ marginTop: "2rem" }}>
@@ -343,7 +217,7 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
               }}
               disabled={submitting}
             >
-              {submitting ? "Submitting..." : "Submit Application"}
+              {submitting ? "Submitting..." : "Next"}
             </button>
           </div>
         </form>

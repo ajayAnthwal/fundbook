@@ -134,12 +134,12 @@ export default function FormStep2({
     }
   }, [formData]);
 
-  useEffect(()=>{
-    (async function(){
+  useEffect(() => {
+    (async function () {
       const res = await getBusinessTypes();
       setBusinessTypes(res?.data);
-    })()
-  },[])
+    })();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -402,7 +402,7 @@ export default function FormStep2({
               }}
               disabled={submitting}
             >
-              {submitting ? "Submitting..." : "Submit Business Details"}
+              {submitting ? "Submitting..." : "Next"}
             </button>
           </div>
         </form>

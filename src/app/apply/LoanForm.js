@@ -8,7 +8,7 @@ import { submitLoanApplication } from "./api";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function LoanForm() {
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(4);
   const [formData, setFormData] = useState({
     amount: "",
     loanType: "",
@@ -75,7 +75,7 @@ export default function LoanForm() {
               />
             )}
 
-            <div className="d-flex justify-content-between mt-4">
+            {/* <div className="d-flex justify-content-between mt-4">
               {step > 1 && (
                 <button className="btn btn-secondary" onClick={prevStep}>
                   Back
@@ -90,7 +90,7 @@ export default function LoanForm() {
                   Submit
                 </button>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

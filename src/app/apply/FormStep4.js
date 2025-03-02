@@ -3,6 +3,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { uploadDocument, saveDocument } from "./api";
 import { fileUploadService, saveApplicationDocumentService } from "@/api/fileService";
+import toast from "react-hot-toast";
 
 export default function FormStep4({
   formData,
@@ -37,13 +38,20 @@ export default function FormStep4({
       const fileId = uploadResponse.file.id;
       const fileUrl = uploadResponse.file.path;
 
-      console.log("Application ID:", formData.applicationId);
+      console.log("Application ID:", formData);
       console.log("File ID:", fileId, "File URL:", fileUrl);
 
       const documentData = {
-        applicationId: formData.applicationId,
-        fileId,
-        category,
+        status: JSON.parse(localStorage.getItem("user"))?.status?.name,
+        reviewComments: "comment",
+        file: {
+          id: fileId
+        },
+        type: category,
+        name: file?.name,
+        application: {
+          id: JSON.parse(localStorage.getItem("applicationData"))?.id
+        }
       };
 
       console.log("Saving document with data:", documentData);
@@ -63,7 +71,7 @@ export default function FormStep4({
         documents: [...formData.documents, newDocument],
       });
 
-      alert("Document Uploaded Successfully!");
+      toast.success("Document Uploaded Successfully!");
     } catch (error) {
       console.error("Upload Error:", error);
       alert("Failed to upload document.");

@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [role, setRole] = useState("User")
+  const [role, setRole] = useState("User");
 
   return (
     <div
@@ -195,6 +195,19 @@ const Sidebar = () => {
             <li className="nav-item">
               <Link
                 className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/manage-loans")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/manage-loans"
+              >
+                📋 Manage loanTypes
+              </Link>
+            </li>
+
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
                   pathname.startsWith("/dashboard/admin/applications")
                     ? "active"
                     : ""
@@ -204,6 +217,7 @@ const Sidebar = () => {
                 📋 Loan Applications
               </Link>
             </li>
+
             <li className="nav-item">
               <Link
                 className={`nav-link ${
@@ -214,6 +228,18 @@ const Sidebar = () => {
                 href="/dashboard/admin/manage-users"
               >
                 👥 Manage Users
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/manage-documents")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/manage-documents"
+              >
+                👥 Manage Documents
               </Link>
             </li>
             <li className="nav-item">

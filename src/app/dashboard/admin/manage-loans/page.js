@@ -1,29 +1,58 @@
 "use client";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { getLoanTypes } from "@/api/loanService";
+import { createLoanTypes } from "@/api/admin/api";
 
-const ManageLoans = () => {
-  const [loanTypes, setLoanTypes] = useState(["Home Loan", "Business Loan"]);
+const ManageLoanTypes = () => {
+  const [loanTypes, setLoanType] = useState([]);
 
-  const addLoan = () => {
+  useEffect(() => {
+    (async function () {
+      const data = await getLoanTypes();
+      if (data?.data) {
+        setLoanType(data.data);
+      }
+    })();
+  }, []);
+
+  const handleAddBusiness = async () => {
     const name = prompt("Enter new Loan Type:");
-    if (name) setLoanTypes([...loanTypes, name]);
+    if (!name) return;
+
+    try {
+      const res = await createLoanTypes({ name });
+      if (res) {
+        toast.success("Loan type added successfully!");
+        setLoanType([...loanTypes, res]);
+      }
+    } catch (err) {
+      console.error("Application Submit Error:", err);
+      toast.error(err.message || "Failed to submit Loan type!");
+    }
   };
 
   return (
     <div className="container mt-5">
-      <h1 className="fs-4 fw-bold mb-4">🏦 Manage Loan Types</h1>
+      <h1 className="fs-4 fw-bold mb-4">🏢 Manage Loan Types</h1>
 
-      <button onClick={addLoan} className="btn btn-success mb-3">
+      <button onClick={handleAddBusiness} className="btn btn-success mb-3">
         ➕ Add Loan Type
       </button>
 
       <ul className="list-group">
-        {loanTypes.map((l, index) => (
-          <li key={index} className="list-group-item">{l}</li>
-        ))}
+        {loanTypes.length > 0 ? (
+          loanTypes.map((b, index) => (
+            <li key={index} className="list-group-item">
+              {b.name}
+            </li>
+          ))
+        ) : (
+          <li className="list-group-item">No Loan Types Found</li>
+        )}
       </ul>
     </div>
   );
 };
 
-export default ManageLoans;
+export default ManageLoanTypes;

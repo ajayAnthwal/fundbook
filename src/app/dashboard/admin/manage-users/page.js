@@ -17,7 +17,7 @@ export default function ManageUsers() {
     setLoading(true);
     setError(null);
 
-    const token = localStorage.getItem("authToken"); // Token auth ke liye
+    const token = localStorage.getItem("authToken");
     if (!token) {
       setError("User is not authenticated. Please log in.");
       setLoading(false);
@@ -25,7 +25,7 @@ export default function ManageUsers() {
     }
 
     try {
-      const response = await axios.get(API_URL, {
+      const { data } = await axios.get(API_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -33,10 +33,11 @@ export default function ManageUsers() {
         params: {
           page: 1,
           limit: 10,
+          sort: "name",
         },
       });
 
-      setUsers(response.data.data || []);
+      setUsers(data?.data || []);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch users");
     } finally {
@@ -52,7 +53,7 @@ export default function ManageUsers() {
       {error && <Alert variant="danger">{error}</Alert>}
 
       {!loading && !error && (
-        <Table striped bordered hover>
+        <Table striped bordered hover responsive>
           <thead>
             <tr>
               <th>#</th>
@@ -69,7 +70,9 @@ export default function ManageUsers() {
               users.map((user, index) => (
                 <tr key={user.id}>
                   <td>{index + 1}</td>
-                  <td>{`${user.firstName} ${user.lastName}`}</td>
+                  <td>
+                    {`${user.firstName || ""} ${user.lastName || ""}`.trim()}
+                  </td>
                   <td>{user.email || "N/A"}</td>
                   <td>{user.mobile || "N/A"}</td>
                   <td>{user.role?.name || "N/A"}</td>
@@ -91,7 +94,9 @@ export default function ManageUsers() {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center">No users found.</td>
+                <td colSpan="7" className="text-center">
+                  No users found.
+                </td>
               </tr>
             )}
           </tbody>

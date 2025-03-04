@@ -18,6 +18,8 @@ export default function ManageUsers() {
     setError(null);
 
     const token = localStorage.getItem("authToken");
+    console.log("Token being sent:", token);
+
     if (!token) {
       setError("User is not authenticated. Please log in.");
       setLoading(false);
@@ -33,12 +35,13 @@ export default function ManageUsers() {
         params: {
           page: 1,
           limit: 10,
-          sort: "name",
         },
       });
 
+      console.log("API Response:", data);
       setUsers(data?.data || []);
     } catch (err) {
+      console.error("API Error:", err.response);
       setError(err.response?.data?.message || "Failed to fetch users");
     } finally {
       setLoading(false);

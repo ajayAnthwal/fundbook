@@ -1,17 +1,14 @@
 "use client";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Spinner, Alert, Button, Modal, Pagination } from "react-bootstrap";
+import { Table, Spinner, Alert, Button, Pagination } from "react-bootstrap";
 
 const ApplicationsPage = () => {
   const API_URL = "http://194.195.112.4:3070/api/v1/applications";
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-
-  // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10; // Per page limit
@@ -23,8 +20,8 @@ const ApplicationsPage = () => {
   const fetchApplications = async () => {
     setLoading(true);
     setError(null);
-
     const token = localStorage.getItem("authToken");
+
     if (!token) {
       setError("User is not authenticated. Please log in.");
       setLoading(false);
@@ -37,44 +34,13 @@ const ApplicationsPage = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        params: {
-          page: currentPage,
-          limit: pageSize,
-        },
+        params: { page: currentPage, limit: pageSize },
       });
 
       setApplications(response.data.data || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch applications");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchApplicationDetails = async (id) => {
-    setLoading(true);
-    setError(null);
-
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      setError("User is not authenticated. Please log in.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${API_URL}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      setSelectedApplication(response.data);
-      setShowModal(true);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch application details");
     } finally {
       setLoading(false);
     }
@@ -120,9 +86,9 @@ const ApplicationsPage = () => {
                     <td>{app.status || "Pending"}</td>
                     <td>{new Date(app.createdAt).toLocaleDateString()}</td>
                     <td>
-                      <Button variant="info" onClick={() => fetchApplicationDetails(app.id)}>
-                        View Details
-                      </Button>
+                      <Link href={`/dashboard/admin/applications/${app.id}`}>
+                        <Button variant="info">View Details</Button>
+                      </Link>
                     </td>
                   </tr>
                 ))
@@ -158,36 +124,6 @@ const ApplicationsPage = () => {
           </Pagination>
         </>
       )}
-
-      {/* Modal for Application Details */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Application Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedApplication ? (
-            <div>
-              <p><strong>ID:</strong> {selectedApplication.id}</p>
-              <p><strong>Name:</strong> {selectedApplication.name}</p>
-              <p><strong>Status:</strong> {selectedApplication.status}</p>
-              <p><strong>Initiated By:</strong> {selectedApplication.initiatedBy}</p>
-              <h5>User Details:</h5>
-              <p><strong>Name:</strong> {selectedApplication.user?.firstName} {selectedApplication.user?.lastName}</p>
-              <p><strong>Email:</strong> {selectedApplication.user?.email}</p>
-              <p><strong>Mobile:</strong> {selectedApplication.user?.mobile}</p>
-              <h5>Loan Details:</h5>
-              <p><strong>Type:</strong> {selectedApplication.loanType?.name}</p>
-              <p><strong>Amount:</strong> ₹{selectedApplication.amount}</p>
-              <p><strong>Created At:</strong> {new Date(selectedApplication.createdAt).toLocaleString()}</p>
-            </div>
-          ) : (
-            <p>Loading details...</p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

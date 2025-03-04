@@ -8,7 +8,7 @@ import { submitLoanApplication } from "./api";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function LoanForm() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(4);
   const [formData, setFormData] = useState({
     amount: "",
     loanType: "",

@@ -16,6 +16,7 @@ export default function FormStep4({
 }) {
   const [uploading, setUploading] = useState(false);
   const [documentMappings, setDocumentMappings] = useState([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState({});
 
   useEffect(() => {
     const fetchDocumentMappings = async () => {
@@ -51,33 +52,27 @@ export default function FormStep4({
       const uploadResponse = await fileUploadService(file);
       if (!uploadResponse?.file?.id) throw new Error("Invalid upload response");
 
+      const applicationId = JSON.parse(localStorage.getItem("applicationData"))?.id;
+      if (!applicationId) throw new Error("Application ID not found");
+
       const documentData = {
-        status: JSON.parse(localStorage.getItem("user"))?.status?.name,
-        reviewComments: "comment",
+        status: JSON.parse(localStorage.getItem("user"))?.status?.name || "Pending",
+        reviewComments: "Uploaded Successfully",
         file: { id: uploadResponse.file.id },
         type: docType,
         name: file.name,
-        application: {
-          id: JSON.parse(localStorage.getItem("applicationData"))?.id,
-        },
+        application: { id: applicationId },
       };
 
       await saveApplicationDocumentService(documentData);
-      setFormData({
-        ...formData,
-        documents: [
-          ...formData.documents,
-          {
-            name: file.name,
-            category: docType,
-            fileId: uploadResponse.file.id,
-          },
-        ],
-      });
+      setUploadedDocuments((prev) => ({
+        ...prev,
+        [docType]: file.name,
+      }));
       toast.success("Document Uploaded Successfully!");
     } catch (error) {
       console.error("Upload Error:", error);
-      alert("Failed to upload document.");
+      toast.error("Failed to upload document.");
     }
     setUploading(false);
   };
@@ -94,8 +89,11 @@ export default function FormStep4({
                 type="file"
                 className="form-control me-2"
                 onChange={(e) => handleFileChange(e, doc.documentType.name)}
-                disabled={uploading}
+                disabled={uploading || uploadedDocuments[doc.documentType.name]}
               />
+              {uploadedDocuments[doc.documentType.name] && (
+                <span className="text-success ms-2">Uploaded: {uploadedDocuments[doc.documentType.name]}</span>
+              )}
             </div>
           ))
         ) : (

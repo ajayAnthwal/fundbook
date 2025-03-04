@@ -1,9 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { uploadDocument, saveDocument } from "./api";
-import { fileUploadService, saveApplicationDocumentService } from "@/api/fileService";
+import {
+  fileUploadService,
+  saveApplicationDocumentService,
+} from "@/api/fileService";
 import toast from "react-hot-toast";
+import axios from "axios"; // Axios import kiya hai jo use ho raha hai
 
 export default function FormStep4({
   formData,
@@ -11,8 +14,36 @@ export default function FormStep4({
   prevStep,
   submitForm,
 }) {
-  const [category, setCategory] = useState("Business Docs");
   const [uploading, setUploading] = useState(false);
+  const [documentMappings, setDocumentMappings] = useState([]);
+  const [category, setCategory] = useState("");
+
+  useEffect(() => {
+    const fetchDocumentMappings = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+          throw new Error("No auth token found");
+        }
+
+        const response = await axios.get(
+          "http://194.195.112.4:3070/api/v1/document-mappings",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: { filters: category },
+          }
+        );
+        setDocumentMappings(response.data.data);
+      } catch (error) {
+        console.error("Error fetching document mappings:", error);
+      }
+    };
+
+    fetchDocumentMappings();
+  }, []);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -45,13 +76,13 @@ export default function FormStep4({
         status: JSON.parse(localStorage.getItem("user"))?.status?.name,
         reviewComments: "comment",
         file: {
-          id: fileId
+          id: fileId,
         },
         type: category,
         name: file?.name,
         application: {
-          id: JSON.parse(localStorage.getItem("applicationData"))?.id
-        }
+          id: JSON.parse(localStorage.getItem("applicationData"))?.id,
+        },
       };
 
       console.log("Saving document with data:", documentData);
@@ -83,11 +114,26 @@ export default function FormStep4({
     try {
       console.log("Submitting Loan Application with Data:", formData);
 
-      const response = await fetch("/api/loan/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const token = localStorage.getItem("authToken");
+
+      const response = await fetch(
+        "http://194.195.112.4:3070/api/v1/application-documents",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: formData.status,
+            reviewComments: formData.reviewComments,  
+            file: { id: formData.fileId },
+            type: formData.type,
+            name: formData.name,
+            application: { id: formData.applicationId },
+          }),
+        }
+      );
 
       console.log("API Response Status:", response.status);
 
@@ -120,9 +166,15 @@ export default function FormStep4({
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          <option>Business Docs</option>
-          <option>Financial Docs</option>
-          <option>Additional Docs</option>
+          {documentMappings.length > 0 ? (
+            documentMappings.map((doc, index) => (
+              <option key={index} value={doc.documentType.name}>
+                {doc.documentType.name}
+              </option>
+            ))
+          ) : (
+            <option disabled>Loading...</option>
+          )}
         </select>
       </div>
       <div className="mb-3">

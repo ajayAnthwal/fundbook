@@ -7,7 +7,7 @@ const Navbar = ({ user }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    router.push("/auth/login");
+    router.push("/auth");
   };
 
   return (

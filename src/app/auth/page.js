@@ -43,7 +43,7 @@ export default function AuthPage() {
           localStorage.setItem("token", response.token);
           console.log("Token set successfully!");
         }
-        // router.push("/dashboard");
+        router.push("/dashboard/user/profile");
       } else {
         toast.error("Token not received from API");
       }

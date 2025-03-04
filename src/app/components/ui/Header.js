@@ -5,17 +5,17 @@ import { useEffect, useState } from "react";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check for authentication
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
 
   // Function to close mobile menu
   const closeMenu = () => {
-    const navbarCollapse = document.getElementById("navbarNavDropdown");
-    if (navbarCollapse) {
-      const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-        hide: true
-      });
-      bsCollapse.hide();
-      setIsMenuOpen(false);
-    }
+    setIsMenuOpen(false);
   };
 
   // Function to toggle menu
@@ -23,42 +23,29 @@ export default function Header() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Initialize Bootstrap collapse
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      require('bootstrap/js/dist/collapse');
-    }
-  }, []);
+  // Function to handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    window.location.href = "/auth"; 
+  };
 
   return (
     <header
       id="header"
       className="navbar navbar-expand-lg navbar-end navbar-absolute-top navbar-light navbar-show-hide"
-      data-hs-header-options={{
-        fixMoment: 1000,
-        fixEffect: "slide",
-      }}
     >
       <div className="container">
         <nav className="js-mega-menu navbar-nav-wrap">
           {/* Default Logo */}
           <Link className="navbar-brand" href="/" aria-label="Front" onClick={closeMenu}>
-            <Image
-              className="navbar-brand-logo"
-              src="/fundbook.png"
-              alt="Logo"
-              width={200}
-              height={80}
-            />
+            <Image className="navbar-brand-logo" src="/fundbook.png" alt="Logo" width={200} height={80} />
           </Link>
 
           {/* Toggler */}
           <button
             className="navbar-toggler"
             type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNavDropdown"
-            aria-controls="navbarNavDropdown"
             aria-expanded={isMenuOpen}
             aria-label="Toggle navigation"
             onClick={toggleMenu}
@@ -72,10 +59,7 @@ export default function Header() {
           </button>
 
           {/* Collapse */}
-          <div 
-            className={`collapse navbar-collapse ${isMenuOpen ? 'show' : ''}`} 
-            id="navbarNavDropdown"
-          >
+          <div className={`collapse navbar-collapse ${isMenuOpen ? "show" : ""}`} id="navbarNavDropdown">
             <ul id="navbarNavDropdownNav" className="navbar-nav">
               <li className="nav-item">
                 <Link className="nav-link text-black" href="/" onClick={closeMenu}>
@@ -98,16 +82,24 @@ export default function Header() {
                 </Link>
               </li>
 
-              {/* Button */}
+              {/* Enquire Button */}
               <li className="nav-item">
-                <Link
-                  className="btn btn-primary btn-transition"
-                  href="#"
-                  target="_blank"
-                  onClick={closeMenu}
-                >
+                <Link className="btn btn-primary btn-transition" href="#" target="_blank" onClick={closeMenu}>
                   Enquire Now
                 </Link>
+              </li>
+
+              {/* Login/Logout Button */}
+              <li className="nav-item">
+                {isAuthenticated ? (
+                  <button className="btn btn-danger ms-2" onClick={handleLogout}>
+                    Logout
+                  </button>
+                ) : (
+                  <Link className="btn btn-success ms-2" href="/auth">
+                    Login
+                  </Link>
+                )}
               </li>
             </ul>
           </div>

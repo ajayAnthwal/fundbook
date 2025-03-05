@@ -97,7 +97,8 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
   useEffect(() => {
     (async function () {
       const data = await getLoanTypes();
-      if (data) {
+      console.log("🚀 Loan Types Fetched:", data?.data);
+      if (data?.data?.length) {
         setLoanType(data?.data);
       }
     })();
@@ -109,6 +110,12 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       ...prev,
       [name]: value,
     }));
+
+    // Loan Type select होते ही localStorage में save करें
+    if (name === "loanType") {
+      localStorage.setItem("selectedLoanTypeId", value);
+      console.log("💾 Selected Loan Type ID saved:", value);
+    }
   };
 
   const handleSubmit = async (e) => {

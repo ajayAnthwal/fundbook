@@ -54,35 +54,33 @@ export const getApplicationDocuments = async (
   }
 };
 
+
+
 export const getDocumentsById = async (id) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("No token found!");
 
-    const response = await fetch(
-      `${BASE_URL}/api/v1/application-documents/${id}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(`${BASE_URL}/api/v1/application-documents/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw error;
+      throw new Error("Failed to fetch documents");
     }
 
-    const data = await response.json();
-    console.log("Application details:", data);
-    return data;
+    return await response.json();
   } catch (error) {
-    console.error("Application details Error:", error);
+    console.error("API Error:", error);
     throw error;
   }
 };
+
+
 
 // 📌 2. Get Single Application Details
 export const getApplicationById = async (id) => {
@@ -175,35 +173,9 @@ export const updateApplication = async (id, applicationData) => {
   }
 };
 
-export const getDocumentById = async (documentId) => {
-  try {
-    const token = localStorage.getItem("authToken");
-    if (!token) throw new Error("No token found!");
 
-    const response = await fetch(
-      `${BASE_URL}/api/v1/application-documents/${documentId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw error;
-    }
 
-    const data = await response.json();
-    console.log("Document data:", data);
-    return data;
-  } catch (error) {
-    console.error("Document Error:", error);
-    throw error;
-  }
-};
 
 // View document in modal
 export const viewDocument = async (documentId) => {

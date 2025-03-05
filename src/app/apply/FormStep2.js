@@ -134,20 +134,49 @@ export default function FormStep2({
     }
   }, [formData]);
 
+  // useEffect(() => {
+  //   (async function () {
+  //     const res = await getBusinessTypes();
+  //     setBusinessTypes(res?.data);
+  //   })();
+  // }, []);
+
   useEffect(() => {
     (async function () {
       const res = await getBusinessTypes();
-      setBusinessTypes(res?.data);
+      console.log("🚀 Business Types Fetched:", res?.data);
+      if (res?.data?.length) {
+        setBusinessTypes(res?.data);
+        const businessTypeIds = res.data.map((type) => type.id);
+        localStorage.setItem("businessTypeIds", JSON.stringify(businessTypeIds));
+        console.log("💾 Saved Business Type IDs:", businessTypeIds);
+      }
     })();
   }, []);
+  
+
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setLocalFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+  
     setLocalFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    if (name === "businessType") {
+      localStorage.setItem("selectedBusinessTypeId", value);
+      console.log("✅ Selected Business Type ID saved:", value);
+    }
   };
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

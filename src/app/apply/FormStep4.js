@@ -22,17 +22,36 @@ export default function FormStep4({
     const fetchDocumentMappings = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) throw new Error("No auth token found");
+        if (!token) {
+          console.error("❌ No auth token found");
+          toast.error("Authentication error, please login again.");
+          return;
+        }
 
-        const response = await axios.get(
-          "http://194.195.112.4:3070/api/v1/document-mappings",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const loanTypeId = localStorage.getItem("selectedLoanTypeId");
+        const businessTypeId = localStorage.getItem("selectedBusinessTypeId");
+
+        if (!loanTypeId || !businessTypeId) {
+          console.error("❌ LoanTypeId or BusinessTypeId missing!");
+          toast.error("Loan and Business Type IDs are missing.");
+          return;
+        }
+
+        console.log("🚀 Loan Type ID:", loanTypeId);
+        console.log("🚀 Business Type ID:", businessTypeId);
+
+        const url = `http://194.195.112.4:3070/api/v1/document-mappings?filters={"businessType":{"id":"${businessTypeId}"},"loanType":{"id":"${loanTypeId}"}}`;
+        console.log("📡 Fetching API with URL:", url);
+
+        const response = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log("✅ API Response:", response.data);
         setDocumentMappings(response.data.data);
       } catch (error) {
-        console.error("Error fetching document mappings:", error);
+        console.error("❌ Error fetching document mappings:", error);
+        toast.error("Failed to load document requirements.");
       }
     };
 
@@ -52,11 +71,13 @@ export default function FormStep4({
       const uploadResponse = await fileUploadService(file);
       if (!uploadResponse?.file?.id) throw new Error("Invalid upload response");
 
-      const applicationId = JSON.parse(localStorage.getItem("applicationData"))?.id;
+      const applicationData = localStorage.getItem("applicationData");
+      const applicationId = applicationData ? JSON.parse(applicationData)?.id : null;
       if (!applicationId) throw new Error("Application ID not found");
 
       const documentData = {
-        status: JSON.parse(localStorage.getItem("user"))?.status?.name || "Pending",
+        status:
+          JSON.parse(localStorage.getItem("user"))?.status?.name || "Pending",
         reviewComments: "Uploaded Successfully",
         file: { id: uploadResponse.file.id },
         type: docType,
@@ -92,7 +113,9 @@ export default function FormStep4({
                 disabled={uploading || uploadedDocuments[doc.documentType.name]}
               />
               {uploadedDocuments[doc.documentType.name] && (
-                <span className="text-success ms-2">Uploaded: {uploadedDocuments[doc.documentType.name]}</span>
+                <span className="text-success ms-2">
+                  Uploaded: {uploadedDocuments[doc.documentType.name]}
+                </span>
               )}
             </div>
           ))

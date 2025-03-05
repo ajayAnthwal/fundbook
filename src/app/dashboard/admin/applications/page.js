@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Spinner, Alert, Button, Pagination } from "react-bootstrap";
 
-const ApplicationsPage = () => {
-  const API_URL = "http://194.195.112.4:3070/api/v1/applications";
-  const [applications, setApplications] = useState([]);
+const ApplicationDocumentsPage = () => {
+  const API_URL = "http://194.195.112.4:3070/api/v1/application-documents";
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,10 +14,10 @@ const ApplicationsPage = () => {
   const pageSize = 10; // Per page limit
 
   useEffect(() => {
-    fetchApplications();
+    fetchDocuments();
   }, [currentPage]);
 
-  const fetchApplications = async () => {
+  const fetchDocuments = async () => {
     setLoading(true);
     setError(null);
     const token = localStorage.getItem("authToken");
@@ -34,13 +34,13 @@ const ApplicationsPage = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        params: { page: currentPage, limit: pageSize },
+        params: { page: currentPage, limit: pageSize, filters: "" },
       });
 
-      setApplications(response.data.data || []);
+      setDocuments(response.data.data || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch applications");
+      setError(err.response?.data?.message || "Failed to fetch documents");
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ const ApplicationsPage = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Applications List</h2>
+      <h2 className="mb-4">Application Documents</h2>
 
       {loading && <Spinner animation="border" variant="primary" />}
       {error && <Alert variant="danger">{error}</Alert>}
@@ -59,34 +59,40 @@ const ApplicationsPage = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Application ID</th>
+                <th>Document ID</th>
                 <th>Name</th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Mobile</th>
-                <th>Loan Type</th>
-                <th>Amount</th>
                 <th>Status</th>
+                <th>Review Comments</th>
+                <th>File</th>
                 <th>Created At</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {applications.length > 0 ? (
-                applications.map((app, index) => (
-                  <tr key={app.id || index}>
+              {documents.length > 0 ? (
+                documents.map((doc, index) => (
+                  <tr key={doc.id || index}>
                     <td>{(currentPage - 1) * pageSize + index + 1}</td>
-                    <td>{app.id || "N/A"}</td>
-                    <td>{app.name || "N/A"}</td>
-                    <td>{`${app.user?.firstName || "N/A"} ${app.user?.lastName || ""}`}</td>
-                    <td>{app.user?.email || "N/A"}</td>
-                    <td>{app.user?.mobile || "N/A"}</td>
-                    <td>{app.loanType?.name || "N/A"}</td>
-                    <td>₹{app.amount || 0}</td>
-                    <td>{app.status || "Pending"}</td>
-                    <td>{new Date(app.createdAt).toLocaleDateString()}</td>
+                    <td>{doc.id || "N/A"}</td>
+                    <td>{doc.name || "N/A"}</td>
+                    <td>{doc.status || "Pending"}</td>
+                    <td>{doc.reviewComments || "N/A"}</td>
                     <td>
-                      <Link href={`/dashboard/admin/applications/${app.id}`}>
+                      {doc.file?.path ? (
+                        <a
+                          href={doc.file.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View File
+                        </a>
+                      ) : (
+                        "No File"
+                      )}
+                    </td>
+                    <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <Link href={`/dashboard/admin/applications/${doc.id}`}>
                         <Button variant="info">View Details</Button>
                       </Link>
                     </td>
@@ -94,8 +100,8 @@ const ApplicationsPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="11" className="text-center">
-                    No applications found.
+                  <td colSpan="8" className="text-center">
+                    No documents found.
                   </td>
                 </tr>
               )}
@@ -118,7 +124,9 @@ const ApplicationsPage = () => {
               </Pagination.Item>
             ))}
             <Pagination.Next
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
             />
           </Pagination>
@@ -128,4 +136,4 @@ const ApplicationsPage = () => {
   );
 };
 
-export default ApplicationsPage;
+export default ApplicationDocumentsPage;

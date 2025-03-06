@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [role, setRole] = useState("Admin");
+  const [role, setRole] = useState("User");
 
   return (
     <div
@@ -102,6 +102,18 @@ const Sidebar = () => {
                 href="/dashboard/user/oldapplications"
               >
                 📂 Old Applications
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/user/notification")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/user/notification"
+              >
+                📂 Notification
               </Link>
             </li>
           </>

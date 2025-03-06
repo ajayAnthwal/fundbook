@@ -73,7 +73,7 @@ const ApplicationDetailsPage = () => {
 
     try {
       const response = await axios.patch(
-        `http://194.195.112.4:3070/api/v1/application-documents/${id}`,
+        `http://194.195.112.4:3070/api/v1/application-additional-documents`,
         { reviewComments: comment },
         {
           headers: {

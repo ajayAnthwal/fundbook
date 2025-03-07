@@ -8,18 +8,30 @@ import { Spinner, Card } from "react-bootstrap";
 const ApplicationDetails = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // ID ko localStorage se uthao
   const storedData = JSON.parse(localStorage.getItem("userData"));
   const id = storedData?.id;
-  console.log(id, "id");
 
   const API_URL = `http://194.195.112.4:3070/api/v1/application-additional-documents/${id}`;
 
+
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null); // Reset error before API call
+
       try {
+        if (!id) {
+          throw new Error("User ID not found in localStorage!");
+        }
+
         const authToken = localStorage.getItem("authToken");
+
+        if (!authToken) {
+          throw new Error("Authentication token is missing. Please log in again.");
+        }
 
         const response = await axios.get(API_URL, {
           headers: {
@@ -28,9 +40,11 @@ const ApplicationDetails = () => {
           },
         });
 
+        console.log("API Response:", response.data);
         setData(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching data:", error.response?.data || error.message);
+        setError(error.response?.data?.message || "Failed to fetch data");
       } finally {
         setLoading(false);
       }
@@ -43,6 +57,10 @@ const ApplicationDetails = () => {
 
   if (loading) {
     return <Spinner animation="border" variant="primary" />;
+  }
+
+  if (error) {
+    return <p className="text-danger">{error}</p>;
   }
 
   if (!data) {

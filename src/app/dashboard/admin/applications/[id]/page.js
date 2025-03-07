@@ -112,6 +112,56 @@ const ApplicationDetailsPage = () => {
     }
   };
 
+  // new document need
+
+  const newDocument = async () => {
+    if (!newDoc.comments.trim()) {
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      setError("User is not authenticated. Please log in.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://194.195.112.4:3070/api/v1/application-additional-documents`,
+        {
+          status: document?.status || "pending",
+          reviewComments: newDoc.comments,
+          file: {
+            id: document?.file?.id || "",
+          },
+          type: newDoc.type || "",
+          name: newDoc.name || "",
+          application: {
+            id: document?.application?.id || "",
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setNewDoc({ name: "", type: "", comments: "" }); // Reset the form after submission
+      setShowNewDocModal(false);
+      toast.success("Document submitted successfully!");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to submit document");
+      console.error("API Error:", err.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="container mt-4">
       <h2 className="mb-4 text-primary">Application Document Details</h2>
@@ -341,9 +391,12 @@ const ApplicationDetailsPage = () => {
               >
                 Close
               </Button>
-              <Button variant="primary">Submit</Button>
+              <Button variant="primary" onClick={newDocument}>
+                Submit
+              </Button>
             </Modal.Footer>
           </Modal>
+
           <Card className="p-3 shadow-sm mt-4">
             <Card.Body>
               <h5 className="text-primary">Loan & Application Details</h5>

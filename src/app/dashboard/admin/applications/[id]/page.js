@@ -13,6 +13,7 @@ import {
   Form,
 } from "react-bootstrap";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const ApplicationDetailsPage = () => {
   const { id } = useParams();
@@ -59,7 +60,10 @@ const ApplicationDetailsPage = () => {
   };
 
   const handleSubmitComment = async () => {
-    if (!comment) return;
+    if (!comment.trim()) {
+      setError("Comment cannot be empty");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -71,10 +75,23 @@ const ApplicationDetailsPage = () => {
       return;
     }
 
+    console.log("fa", document.name);
+
     try {
-      const response = await axios.patch(
-        `http://194.195.112.4:3070/api/v1/application-additional-documents`,
-        { reviewComments: comment },
+      const response = await axios.post(
+        `http://194.195.112.4:3070/api/v1/application-documents`,
+        {
+          status: document?.status || "pending",
+          reviewComments: comment.trim(),
+          file: {
+            id: document?.file?.id || "",
+          },
+          type: document?.type || "",
+          name: document?.name || "",
+          application: {
+            id: document?.application?.id || "",
+          },
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -85,9 +102,11 @@ const ApplicationDetailsPage = () => {
 
       setDocument(response.data);
       setShowCommentModal(false);
+      toast.success("Comment submitted successfully!");
       setComment("");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to submit comment");
+      console.error("API Error:", err.response?.data);
     } finally {
       setLoading(false);
     }

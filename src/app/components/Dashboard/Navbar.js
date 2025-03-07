@@ -1,66 +1,98 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FaUserCircle } from "react-icons/fa";
+import { PiSuitcaseSimpleBold } from "react-icons/pi";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Image from "next/image";
 
-const Navbar = ({ user }) => {
+const Navbar = () => {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setRole(parsedUser.role?.name || "User");
+    }
+
+    const checkToken = () => {
+      if (!localStorage.getItem("token")) {
+        router.push("/auth");
+      }
+    };
+
+    checkToken();
+    const interval = setInterval(checkToken, 5000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     router.push("/auth");
   };
 
   return (
-    <div
-      className="navbar-dark bg-dark"
-      style={{
-        backgroundImage: "url(/assets/svg/components/wave-pattern-light.svg)",
-      }}
-    >
-      <div className="container content-space-1 content-space-b-lg-3">
-        <div className="row align-items-center">
-          <div className="col">
-            <div className="d-none d-lg-block">
-              <h1 className="h2 text-white">Personal info</h1>
+    <nav className="navbar navbar-expand-lg bg-dark shadow-sm p-3">
+      <div className="container d-flex align-items-center">
+        <a
+          className="navbar-brand text-white d-flex align-items-center"
+          href="#"
+        >
+          <Image
+            src="/fundbook.png"
+            alt="Fundbook Logo"
+            width={80}
+            height={80}
+            className="me-2 img-fluid"
+          />
+        </a>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        <div
+          className="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          {user && (
+            <div className="d-flex align-items-center text-white me-3">
+              <FaUserCircle size={30} className="me-2 text-light" />
+              <div>
+                <span className="fw-bold text-white">
+                  {user.firstName} {user.lastName}{" "}
+                  <span
+                    className={role === "Admin" ? "text-warning" : "text-info"}
+                  >
+                    ({role})
+                  </span>
+                </span>
+                <br />
+                <span className="text-secondary small">{user.email}</span>
+              </div>
             </div>
-            <nav aria-label="breadcrumb">
-              <ol className="breadcrumb breadcrumb-light mb-0">
-                <li className="breadcrumb-item">Account</li>
-                <li className="breadcrumb-item active" aria-current="page">
-                  Personal Info
-                </li>
-              </ol>
-            </nav>
-          </div>
-          <div className="col-auto">
-            <div className="d-none d-lg-block">
-              <button
-                onClick={handleLogout}
-                className="btn btn-soft-light btn-sm"
-              >
-                Log out
-              </button>
-            </div>
-            <button
-              className="navbar-toggler d-lg-none"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#sidebarNav"
-              aria-controls="sidebarNav"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-default">
-                <i className="bi-list"></i>
-              </span>
-              <span className="navbar-toggler-toggled">
-                <i className="bi-x"></i>
-              </span>
-            </button>
-          </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="btn btn-outline-light rounded-pill px-4 fw-semibold shadow-sm"
+          >
+            Logout
+          </button>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 

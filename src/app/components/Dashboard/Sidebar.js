@@ -29,15 +29,14 @@ const Sidebar = () => {
             <li className="nav-item">
               <Link
                 className={`nav-link ${
-                  pathname.startsWith("/dashboard/user/applications")
-                    ? "active"
-                    : ""
+                  pathname.startsWith("/dashboard/user/home") ? "active" : ""
                 }`}
-                href="/dashboard/user/applications"
+                href="/dashboard/user/home"
               >
                 🏠 Home
               </Link>
             </li>
+
             <li className="nav-item">
               <Link
                 className={`nav-link ${
@@ -48,6 +47,7 @@ const Sidebar = () => {
                 👤 Profile
               </Link>
             </li>
+
             <li className="nav-item">
               <Link
                 className={`nav-link ${
@@ -87,7 +87,7 @@ const Sidebar = () => {
                 className={`nav-link ${
                   pathname.startsWith("/apply") ? "active" : ""
                 }`}
-                href="/apply"
+                href="/dashboard/user/apply"
               >
                 💰 Apply Loan
               </Link>

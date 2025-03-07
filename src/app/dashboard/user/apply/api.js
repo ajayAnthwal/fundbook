@@ -13,7 +13,6 @@ export const getLoanTypes = async () => {
   }
 };
 
-
 // 📌 2. Submit Loan Application
 export const submitLoanApplication = async (formData) => {
   try {
@@ -27,7 +26,6 @@ export const submitLoanApplication = async (formData) => {
     throw error;
   }
 };
-
 
 // 📌 3. Businessdetails
 export const businessdetails = async (formData) => {
@@ -86,4 +84,3 @@ export async function saveDocument(documentData) {
 
   return await response.json();
 }
-

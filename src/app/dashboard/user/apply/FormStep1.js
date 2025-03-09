@@ -1,8 +1,8 @@
 "use client";
-import { updateApplication } from "@/api/loanService";
-import { createApplication, getLoanTypes } from "@/api/loanService";
+import { updateApplication, createApplication, getLoanTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 const formStyles = {
   container: {
@@ -82,6 +82,7 @@ const formStyles = {
 export default function FormStep1({ formData, updateFormData, nextStep }) {
   const searchParams = useSearchParams();
   const isApplicationEdit = searchParams.get("isApplicationEdit");
+
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loanTypes, setLoanType] = useState([]);
@@ -90,6 +91,7 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     name: "",
     loanType: "",
     amount: "",
+    status: "pending",
   });
 
   useEffect(() => {
@@ -98,23 +100,17 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     }
   }, [formData]);
 
-  const prePopulateFormValuesWhileEditForm = () =>{
-    const userapplicationdata = JSON.parse(localStorage.getItem("userApplicationData"));
-    if (isApplicationEdit && userapplicationdata) {
+  const prePopulateFormValuesWhileEditForm = () => {
+    const userApplicationData = JSON.parse(localStorage.getItem("userApplicationData"));
+    if (isApplicationEdit && userApplicationData) {
       setLocalFormData({
-        name: userapplicationdata?.name,
-        loanType: userapplicationdata?.loanType.id,
-        amount: userapplicationdata?.amount,
+        name: userApplicationData?.name || "",
+        loanType: userApplicationData?.loanType?.id || "",
+        amount: userApplicationData?.amount || "",
+        status: userApplicationData?.status || "active",
       });
     }
-
-    console.log("abccc", userapplicationdata);
-    console.log("formdata", localFormData);
-  }
-
-  useEffect(() => {
-    
-  }, []);
+  };
 
   useEffect(() => {
     (async function () {
@@ -122,9 +118,8 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       console.log("🚀 Loan Types Fetched:", data?.data);
       if (data?.data?.length) {
         setLoanType(data?.data);
-
-        if(isApplicationEdit){
-          prePopulateFormValuesWhileEditForm()
+        if (isApplicationEdit) {
+          prePopulateFormValuesWhileEditForm();
         }
       }
     })();
@@ -137,7 +132,6 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       [name]: value,
     }));
 
-    // Loan Type select होते ही localStorage में save करें
     if (name === "loanType") {
       localStorage.setItem("selectedLoanTypeId", value);
       console.log("💾 Selected Loan Type ID saved:", value);
@@ -152,16 +146,19 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     try {
       const applicationData = {
         amount: Number(localFormData.amount),
-        loanType: {
-          id: localFormData.loanType,
-        },
+        loanType: { id: localFormData.loanType },
         name: localFormData.name,
+        status: localFormData.status, 
       };
 
       let res = null;
-      if (isApplicationEdit && localStorage.getItem("userApplicationData")) {
-        let id = 32323; // TODO: dummy id, replace with real once
+      const userApplicationData = JSON.parse(localStorage.getItem("userApplicationData"));
+
+      if (isApplicationEdit && userApplicationData) {
+        let id = userApplicationData.id;
+        console.log("Updating Application with ID:", id);
         res = await updateApplication(applicationData, id);
+        toast.success("Application submitted successfully!");
       } else {
         res = await createApplication(applicationData);
       }
@@ -220,12 +217,11 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
                   required
                 >
                   <option value="">Select Loan Type</option>
-                  {loanTypes &&
-                    loanTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
+                  {loanTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -246,6 +242,24 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
               min="1"
               placeholder="Enter loan amount"
             />
+          </div>
+
+          <div className="d-none" style={formStyles.formGroup}>
+            <label style={formStyles.label} htmlFor="status">
+              Application Status
+            </label>
+            <select
+              style={formStyles.select}
+              id="status"
+              name="status"
+              value={localFormData.status}
+              onChange={handleChange}
+              required
+            >
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
           </div>
 
           <div style={{ marginTop: "2rem" }}>

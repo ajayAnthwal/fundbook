@@ -4,13 +4,6 @@ import { useState, useEffect } from "react";
 
 const BASE_URL = "http://194.195.112.4:3070";
 
-const BUSINESS_TYPES = [
-  { id: "RETAIL", name: "Retail Business" },
-  { id: "WHOLESALE", name: "Wholesale Business" },
-  { id: "MANUFACTURING", name: "Manufacturing" },
-  { id: "SERVICE", name: "Service Business" },
-  { id: "OTHER", name: "Other" },
-];
 
 const formStyles = {
   container: {
@@ -134,13 +127,6 @@ export default function FormStep2({
     }
   }, [formData]);
 
-  // useEffect(() => {
-  //   (async function () {
-  //     const res = await getBusinessTypes();
-  //     setBusinessTypes(res?.data);
-  //   })();
-  // }, []);
-
   useEffect(() => {
     (async function () {
       const res = await getBusinessTypes();
@@ -156,14 +142,6 @@ export default function FormStep2({
       }
     })();
   }, []);
-
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setLocalFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;

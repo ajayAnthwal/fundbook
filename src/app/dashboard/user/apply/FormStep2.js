@@ -2,7 +2,7 @@
 import { getBusinessTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 import { getBusinessDetails, handleUpdateBusiness } from "@/api/loanService";
-
+import { useSearchParams } from "next/navigation";
 
 const BASE_URL = "http://194.195.112.4:3070";
 
@@ -102,14 +102,17 @@ export default function FormStep2({
     applicationId: "",
   });
 
-  
+  const searchParams = useSearchParams();
+  const isApplicationEdit = searchParams.get("isApplicationEdit");
 
+
+  
+// fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const businessDetails = await getBusinessDetails();
         console.log("Fetched Business Details:", businessDetails);
-  
         if (businessDetails && businessDetails.length > 0) {
           setBusinessId(businessDetails[0].id); 
           setBusinessData(businessDetails[0]); 
@@ -118,13 +121,11 @@ export default function FormStep2({
         console.error("Error fetching business details:", error);
       }
     };
-  
     fetchData();
   }, []);
   
   const handleUpdateBusiness = async () => {
     if (!businessId) {
-      console.error("No business ID found to update");
       return;
     }
     const updatedData = {
@@ -150,16 +151,10 @@ export default function FormStep2({
     if (formData) {
       setLocalFormData(formData);
     }
-
-    
     const prevFormData = localStorage.getItem("applicationData");
-    console.log("Previous form data:", prevFormData);
-
     if (prevFormData) {
       try {
         const parsedData = JSON.parse(prevFormData);
-        console.log("Parsed application data:", parsedData);
-
         if (parsedData.id) {
           setLocalFormData((prev) => ({
             ...prev,
@@ -177,10 +172,11 @@ export default function FormStep2({
     }
   }, [formData]);
 
+
+
   useEffect(() => {
     (async function () {
       const res = await getBusinessTypes();
-      console.log("🚀 Business Types Fetched:", res?.data);
       if (res?.data?.length) {
         setBusinessTypes(res?.data);
         const businessTypeIds = res.data.map((type) => type.id);
@@ -188,21 +184,19 @@ export default function FormStep2({
           "businessTypeIds",
           JSON.stringify(businessTypeIds)
         );
-        console.log("💾 Saved Business Type IDs:", businessTypeIds);
       }
     })();
   }, []);
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setLocalFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
     if (name === "businessType") {
       localStorage.setItem("selectedBusinessTypeId", value);
-      console.log("✅ Selected Business Type ID saved:", value);
     }
   };
 
@@ -213,24 +207,18 @@ export default function FormStep2({
 
     try {
       const token = localStorage.getItem("authToken");
-      console.log("Auth Token:", token ? "Present" : "Missing");
-
       if (!token) {
         throw new Error("Please login to submit business details");
       }
-
       const applicationData = localStorage.getItem("applicationData");
       if (!applicationData) {
         throw new Error(
           "Application data not found. Please complete step 1 first."
         );
       }
-
       let applicationId;
       try {
         const parsedData = JSON.parse(applicationData);
-        console.log("Parsed application data:", parsedData);
-
         if (parsedData.id) {
           applicationId = parsedData.id;
         } else if (parsedData.application && parsedData.application.id) {
@@ -239,7 +227,6 @@ export default function FormStep2({
           throw new Error("Invalid application data structure");
         }
       } catch (e) {
-        console.error("Failed to parse application data:", e);
         throw new Error("Invalid application data format");
       }
 
@@ -268,10 +255,6 @@ export default function FormStep2({
       if (localFormData.udyam) {
         businessData.udyam = localFormData.udyam;
       }
-
-      console.log("Submitting business details:", businessData);
-      console.log("API URL:", `${BASE_URL}/api/v1/business-details`);
-
       const response = await fetch(`${BASE_URL}/api/v1/business-details`, {
         method: "POST",
         headers: {
@@ -280,27 +263,18 @@ export default function FormStep2({
         },
         body: JSON.stringify(businessData),
       });
-
-      console.log("Response Status:", response.status);
       const responseText = await response.text();
-      console.log("Raw Response:", responseText);
-
       let responseData;
       try {
         responseData = JSON.parse(responseText);
-        console.log("Parsed API Response:", responseData);
       } catch (e) {
-        console.error("Failed to parse response:", e);
         throw new Error("Invalid response from server");
       }
-
       if (!response.ok) {
         throw new Error(
           responseData.message || "Failed to submit business details"
         );
       }
-
-      console.log("Business details submitted successfully:", responseData);
       localStorage.setItem("businessData", JSON.stringify(responseData));
       if (nextStep) {
         nextStep();

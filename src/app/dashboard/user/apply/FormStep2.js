@@ -1,6 +1,8 @@
 "use client";
 import { getBusinessTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
+import { getBusinessDetails, handleUpdateBusiness } from "@/api/loanService";
+
 
 const BASE_URL = "http://194.195.112.4:3070";
 
@@ -89,6 +91,8 @@ export default function FormStep2({
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [businessTypes, setBusinessTypes] = useState([]);
+  const [businessId, setBusinessId] = useState(null);
+  const [businessData, setBusinessData] = useState(null); 
   const [localFormData, setLocalFormData] = useState({
     email: "",
     mobile: "",
@@ -98,10 +102,56 @@ export default function FormStep2({
     applicationId: "",
   });
 
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const businessDetails = await getBusinessDetails();
+        console.log("Fetched Business Details:", businessDetails);
+  
+        if (businessDetails && businessDetails.length > 0) {
+          setBusinessId(businessDetails[0].id); 
+          setBusinessData(businessDetails[0]); 
+        }
+      } catch (error) {
+        console.error("Error fetching business details:", error);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+  const handleUpdateBusiness = async () => {
+    if (!businessId) {
+      console.error("No business ID found to update");
+      return;
+    }
+    const updatedData = {
+      email: localFormData.email || "",
+      mobile: String(localFormData.mobile) || "",
+      businessType: { id: localFormData.businessType || "" },
+      gst: localFormData.gst || "",
+      udyam: localFormData.udyam || "",
+      application: { id: localFormData.applicationId || "" },
+    };
+  
+    try {
+      const response = await handleUpdateBusiness(updatedData, businessId); 
+      console.log("Business Updated Successfully:", response);
+    } catch (error) {
+      console.error("Error updating business:", error);
+    }
+  };
+  
+  
+  
   useEffect(() => {
     if (formData) {
       setLocalFormData(formData);
     }
+
+    
     const prevFormData = localStorage.getItem("applicationData");
     console.log("Previous form data:", prevFormData);
 

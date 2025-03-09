@@ -30,11 +30,35 @@ export const updateApplication = async (data, id) => {
     return res.data;
   } catch (error) {
     toast.error("Failed to Update application");
-    // toast.error(error.response.data.message)
     new Error(error.response.data.message);
     return null;
   }
 };
+
+
+export const handleUpdateBusiness  = async (data, id) => {
+  try {
+    const res = await axiosClientWithHeaders.patch(`/business-details/${id}`, data);
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to Update application");
+    new Error(error.response.data.message);
+    return null;
+  }
+};
+
+export const getBusinessDetails = async (data) => {
+  try {
+    const res = await axiosClientWithHeaders.get(`/business-details`, data);
+    console.log("getBusinessDetails", res.data.data);
+    return res.data.data;
+  } catch (error) {
+    console.log("error", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+    throw new Error(error.response?.data?.message || "API Error");
+  }
+};
+
 
 export const getBusinessTypes = async () => {
   try {

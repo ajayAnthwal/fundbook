@@ -148,12 +148,14 @@ export default function FormStep2({
       if (res?.data?.length) {
         setBusinessTypes(res?.data);
         const businessTypeIds = res.data.map((type) => type.id);
-        localStorage.setItem("businessTypeIds", JSON.stringify(businessTypeIds));
+        localStorage.setItem(
+          "businessTypeIds",
+          JSON.stringify(businessTypeIds)
+        );
         console.log("💾 Saved Business Type IDs:", businessTypeIds);
       }
     })();
   }, []);
-  
 
   // const handleChange = (e) => {
   //   const { name, value } = e.target;
@@ -165,7 +167,7 @@ export default function FormStep2({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     setLocalFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -175,8 +177,6 @@ export default function FormStep2({
       console.log("✅ Selected Business Type ID saved:", value);
     }
   };
-
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

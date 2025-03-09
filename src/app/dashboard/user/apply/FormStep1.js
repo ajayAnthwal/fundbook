@@ -1,4 +1,5 @@
 "use client";
+import { updateApplication } from "@/api/loanService";
 import { createApplication, getLoanTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 
@@ -97,11 +98,11 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
   useEffect(() => {
     const userapplicationdata = JSON.parse(localStorage.getItem("userData"));
     if (userapplicationdata) {
-      // setLocalFormData({
-      //   name: userapplicationdata.name,
-      //   loanType: userapplicationdata.loanType.name,
-      //   amount: userapplicationdata.amount,
-      // });
+      setLocalFormData({
+        name: userapplicationdata?.name,
+        loanType: userapplicationdata?.loanType?.name,
+        amount: userapplicationdata?.amount,
+      });
     }
     console.log("abccc", userapplicationdata);
     console.log("formdata", localFormData);
@@ -145,7 +146,14 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
         name: localFormData.name,
       };
 
-      const res = await createApplication(applicationData);
+      let res;
+
+      if (localStorage.getItem("userData")) {
+        res = await updateApplication(applicationData, 4545454);
+      } else {
+        res = await createApplication(applicationData);
+      }
+
       if (res) {
         localStorage.setItem("applicationData", JSON.stringify(res));
         if (nextStep) {

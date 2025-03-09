@@ -160,18 +160,18 @@ export const getApplicationDetails = async (id) => {
 };
 
 // Update application details
-export const updateApplication = async (id, applicationData) => {
-  try {
-    const response = await axios.put(
-      `${BASE_URL}/ca/application/${id}`,
-      applicationData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating application:", error);
-    throw error;
-  }
-};
+// export const updateApplication = async (id, applicationData) => {
+//   try {
+//     const response = await axios.put(
+//       `${BASE_URL}/ca/application/${id}`,
+//       applicationData
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error updating application:", error);
+//     throw error;
+//   }
+// };
 
 
 

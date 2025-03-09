@@ -2,6 +2,8 @@ import LoanForm from "./LoanForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function ApplyLoanPage() {
+  console.log();
+  
   return (
     <>
       <div className="d-flex align-items-center justify-content-center bg-light">

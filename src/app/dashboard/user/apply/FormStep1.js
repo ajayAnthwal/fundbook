@@ -95,6 +95,19 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
   }, [formData]);
 
   useEffect(() => {
+    const userapplicationdata = JSON.parse(localStorage.getItem("userData"));
+    if (userapplicationdata) {
+      // setLocalFormData({
+      //   name: userapplicationdata.name,
+      //   loanType: userapplicationdata.loanType.name,
+      //   amount: userapplicationdata.amount,
+      // });
+    }
+    console.log("abccc", userapplicationdata);
+    console.log("formdata", localFormData);
+  }, []);
+
+  useEffect(() => {
     (async function () {
       const data = await getLoanTypes();
       console.log("🚀 Loan Types Fetched:", data?.data);

@@ -6,6 +6,7 @@ import {
   updateApplication,
 } from "@/api/documents";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useRouter } from "next/navigation";
 
 const ApplicationsPage = () => {
   const [applications, setApplications] = useState([]);
@@ -13,6 +14,7 @@ const ApplicationsPage = () => {
   const [editApp, setEditApp] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     fetchApplications();
@@ -48,14 +50,8 @@ const ApplicationsPage = () => {
   };
 
   const openEditModal = (app) => {
-    setEditApp({
-      id: app.id,
-      amount: app.amount,
-      loanType: app.loanType?.name || "",
-      name: app.name,
-      status: app.status?.name || "",
-    });
-    new bootstrap.Modal(document.getElementById("editModal")).show();
+    localStorage.setItem("userData",JSON.stringify(app))
+    router.push(`/dashboard/user/apply`, app)
   };
 
   const handleEditSubmit = async (e) => {
@@ -172,48 +168,6 @@ const ApplicationsPage = () => {
                 className="btn-close"
                 data-bs-dismiss="modal"
               ></button>
-            </div>
-            <div className="modal-body">
-              {editApp && (
-                <form onSubmit={handleEditSubmit}>
-                  <div className="mb-3">
-                    <label>Amount</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={editApp.amount}
-                      onChange={(e) =>
-                        setEditApp({ ...editApp, amount: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label>Loan Type</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editApp.loanType}
-                      onChange={(e) =>
-                        setEditApp({ ...editApp, loanType: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label>Status</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editApp.status}
-                      onChange={(e) =>
-                        setEditApp({ ...editApp, status: e.target.value })
-                      }
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-success">
-                    Save Changes
-                  </button>
-                </form>
-              )}
             </div>
           </div>
         </div>

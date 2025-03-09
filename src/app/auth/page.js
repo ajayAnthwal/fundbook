@@ -1,7 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { authAPI } from "@/api/auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -70,6 +70,10 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(()=>{
+    localStorage.clear();
+  },[])
 
   return (
     <main className="min-vh-100 d-flex align-items-center py-5">

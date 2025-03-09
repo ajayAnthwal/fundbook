@@ -2,6 +2,7 @@
 import { updateApplication } from "@/api/loanService";
 import { createApplication, getLoanTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const formStyles = {
   container: {
@@ -79,6 +80,8 @@ const formStyles = {
 };
 
 export default function FormStep1({ formData, updateFormData, nextStep }) {
+  const searchParams = useSearchParams();
+  const isApplicationEdit = searchParams.get("isApplicationEdit");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loanTypes, setLoanType] = useState([]);
@@ -95,17 +98,22 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
     }
   }, [formData]);
 
-  useEffect(() => {
-    const userapplicationdata = JSON.parse(localStorage.getItem("userData"));
-    if (userapplicationdata) {
+  const prePopulateFormValuesWhileEditForm = () =>{
+    const userapplicationdata = JSON.parse(localStorage.getItem("userApplicationData"));
+    if (isApplicationEdit && userapplicationdata) {
       setLocalFormData({
         name: userapplicationdata?.name,
-        loanType: userapplicationdata?.loanType?.name,
+        loanType: userapplicationdata?.loanType.id,
         amount: userapplicationdata?.amount,
       });
     }
+
     console.log("abccc", userapplicationdata);
     console.log("formdata", localFormData);
+  }
+
+  useEffect(() => {
+    
   }, []);
 
   useEffect(() => {
@@ -114,6 +122,10 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
       console.log("🚀 Loan Types Fetched:", data?.data);
       if (data?.data?.length) {
         setLoanType(data?.data);
+
+        if(isApplicationEdit){
+          prePopulateFormValuesWhileEditForm()
+        }
       }
     })();
   }, []);
@@ -146,10 +158,10 @@ export default function FormStep1({ formData, updateFormData, nextStep }) {
         name: localFormData.name,
       };
 
-      let res;
-
-      if (localStorage.getItem("userData")) {
-        res = await updateApplication(applicationData, 4545454);
+      let res = null;
+      if (isApplicationEdit && localStorage.getItem("userApplicationData")) {
+        let id = 32323; // TODO: dummy id, replace with real once
+        res = await updateApplication(applicationData, id);
       } else {
         res = await createApplication(applicationData);
       }

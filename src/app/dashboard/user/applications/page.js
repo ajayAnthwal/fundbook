@@ -50,8 +50,8 @@ const ApplicationsPage = () => {
   };
 
   const openEditModal = (app) => {
-    localStorage.setItem("userData",JSON.stringify(app))
-    router.push(`/dashboard/user/apply`, app)
+    localStorage.setItem("userApplicationData",JSON.stringify(app))
+    router.push(`/dashboard/user/apply?isApplicationEdit=true`, app)
   };
 
   const handleEditSubmit = async (e) => {

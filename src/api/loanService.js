@@ -7,7 +7,8 @@ export const getLoanTypes = async () => {
     return res.data;
   } catch (error) {
     toast.error("Unable to get Loan types.");
-    return new Error("unable to get loan types");
+    new Error("unable to get loan types");
+    return null;
   }
 };
 
@@ -18,7 +19,8 @@ export const createApplication = async (data) => {
   } catch (error) {
     toast.error("Failed to submit application");
     // toast.error(error.response.data.message)
-    return new Error(error.response.data.message);
+    new Error(error.response.data.message);
+    return null;
   }
 };
 
@@ -27,9 +29,10 @@ export const updateApplication = async (data, id) => {
     const res = await axiosClientWithHeaders.patch(`/applications/${id}`, data);
     return res.data;
   } catch (error) {
-    toast.error("Failed to submit application");
+    toast.error("Failed to Update application");
     // toast.error(error.response.data.message)
-    return new Error(error.response.data.message);
+    new Error(error.response.data.message);
+    return null;
   }
 };
 
@@ -44,7 +47,8 @@ export const getBusinessTypes = async () => {
     console.log("error", error);
 
     toast.error(error.response.data.message);
-    return new Error(error.response.data.message);
+    new Error(error.response.data.message);
+    return null;
   }
 };
 
@@ -55,6 +59,7 @@ export const getMyApplication = async (id) => {
   } catch (error) {
     console.log("error", error);
     toast.error(error.response?.data?.message || "Unable to fetch application");
-    return new Error(error.response?.data?.message);
+    new Error(error.response?.data?.message);
+    return null;
   }
 };

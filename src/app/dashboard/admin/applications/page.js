@@ -55,17 +55,15 @@ const ApplicationDocumentsPage = () => {
 
       {!loading && !error && (
         <>
-          <Table striped bordered hover>
-            <thead>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
               <tr>
-                <th>#</th>
-                <th>Document ID</th>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Review Comments</th>
-                <th>File</th>
-                <th>Created At</th>
-                <th>Action</th>
+                <th className="text-white text-center">#</th>
+                <th className="text-white text-center">Document ID</th>
+                <th className="text-white text-center">Name</th>
+                <th className="text-white text-center">Status</th>
+                <th className="text-white text-center">Created At</th>
+                <th className="text-white text-center">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -74,33 +72,30 @@ const ApplicationDocumentsPage = () => {
                   <tr key={doc.id || index}>
                     <td>{(currentPage - 1) * pageSize + index + 1}</td>
                     <td>{doc.id || "N/A"}</td>
-                    <td>{doc.name || "N/A"}</td>
-                    <td>{doc.status || "Pending"}</td>
-                    <td>{doc.reviewComments || "N/A"}</td>
+                    <td>{doc.application?.name || "N/A"}</td>
                     <td>
-                      {doc.file?.path ? (
-                        <a
-                          href={doc.file.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View File
-                        </a>
-                      ) : (
-                        "No File"
-                      )}
+                      <span
+                        className={`badge bg-${
+                          doc.status === "Active" ? "success" : "warning"
+                        }`}
+                      >
+                        {doc.status || "Pending"}
+                      </span>
                     </td>
+                    
                     <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
                     <td>
                       <Link href={`/dashboard/admin/applications/${doc.id}`}>
-                        <Button variant="info">View Details</Button>
+                        <Button variant="info" size="sm">
+                          View Details
+                        </Button>
                       </Link>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center">
+                  <td colSpan="7" className="text-center text-muted">
                     No documents found.
                   </td>
                 </tr>

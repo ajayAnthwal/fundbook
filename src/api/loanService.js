@@ -47,6 +47,7 @@ export const handleUpdateBusiness  = async (data, id) => {
   }
 };
 
+
 export const getBusinessDetails = async (data) => {
   try {
     const res = await axiosClientWithHeaders.get(`/business-details`, data);

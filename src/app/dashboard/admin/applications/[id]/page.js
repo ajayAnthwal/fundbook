@@ -11,9 +11,19 @@ import {
   Image,
   Modal,
   Form,
+  Row,
+  Col,
+  Badge,
 } from "react-bootstrap";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import {
+  FaRupeeSign,
+  FaCalendarAlt,
+  FaUser,
+  FaClipboardCheck,
+  FaCommentDots,
+} from "react-icons/fa";
 
 const ApplicationDetailsPage = () => {
   const { id } = useParams();
@@ -112,8 +122,6 @@ const ApplicationDetailsPage = () => {
     }
   };
 
-  // new document need
-
   const newDocument = async () => {
     if (!newDoc.comments.trim()) {
       return;
@@ -171,60 +179,181 @@ const ApplicationDetailsPage = () => {
 
       {!loading && !error && document && (
         <>
-          <Card className="p-3 shadow-sm mb-4">
-            <Card.Body>
-              <h4 className="text-secondary">{document?.name || "N/A"}</h4>
-              <p>
-                <strong>Document ID:</strong> {document?.id || "N/A"}
-              </p>
-              <p>
-                <strong>Status:</strong> {document?.status || "N/A"}
-              </p>
-              <p>
-                <strong>Review Comments:</strong>{" "}
-                {document?.reviewComments || "N/A"}
-              </p>
-              <p>
-                <strong>Created At:</strong>{" "}
-                {document?.createdAt
-                  ? new Date(document.createdAt).toLocaleString()
-                  : "N/A"}
-              </p>
-              <p>
-                <strong>Updated At:</strong>{" "}
-                {document?.updatedAt
-                  ? new Date(document.updatedAt).toLocaleString()
-                  : "N/A"}
-              </p>
-              {document?.file?.path && (
-                <p>
-                  <strong>File:</strong>
-                  <div className="d-flex gap-2 align-items-center">
-                    <a
-                      href={document.file.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-sm btn-info"
-                    >
-                      View Document
-                    </a>
+          <div>
+            <div>
+              <Card className="p-4 shadow-lg  border-0 rounded">
+                <Card.Body>
+                  <h4 className="text-primary mb-4">
+                    📄 Loan & Application Details
+                  </h4>
 
-                    <Button
-                      variant="warning"
-                      className="ms-2"
-                      onClick={() => setShowCommentModal(true)}
+                  <Row>
+                    <Col md={6}>
+                      <p>
+                        <strong>
+                          <FaClipboardCheck /> Application Name:
+                        </strong>{" "}
+                        {document.application?.name || "N/A"}
+                      </p>
+                      <p>
+                        <strong>💳 Loan Type:</strong>{" "}
+                        {document.application?.loanType?.name || "N/A"}
+                      </p>
+                      <p>
+                        <strong>
+                          <FaRupeeSign /> Amount:
+                        </strong>
+                        <Badge bg="success" className="ms-2">
+                          ₹{document.application?.amount || "N/A"}
+                        </Badge>
+                      </p>
+                    </Col>
+
+                    <Col md={6}>
+                      <p>
+                        <strong>
+                          <FaUser /> Initiated By:
+                        </strong>{" "}
+                        {document.application?.initiatedBy || "N/A"}
+                      </p>
+                      <p>
+                        <strong>📌 Application Status:</strong>
+                        <Badge
+                          bg={
+                            document.application?.status === "pending"
+                              ? "warning"
+                              : document.application?.status === "approved"
+                              ? "success"
+                              : "danger"
+                          }
+                          className="ms-2"
+                        >
+                          {document.application?.status || "N/A"}
+                        </Badge>
+                      </p>
+                    </Col>
+                  </Row>
+
+                  <hr />
+
+                  <Row>
+                    <Col md={6}>
+                      <p>
+                        <strong>
+                          <FaCalendarAlt /> Created At:
+                        </strong>
+                        {document.application?.createdAt
+                          ? new Date(
+                              document.application.createdAt
+                            ).toLocaleString()
+                          : "N/A"}
+                      </p>
+                    </Col>
+
+                    <Col md={6}>
+                      <p>
+                        <strong>
+                          <FaCalendarAlt /> Updated At:
+                        </strong>
+                        {document.application?.updatedAt
+                          ? new Date(
+                              document.application.updatedAt
+                            ).toLocaleString()
+                          : "N/A"}
+                      </p>
+                    </Col>
+                  </Row>
+
+                  {/* Review Comments Section */}
+                  <div className="mt-4">
+                    <h5 className="text-secondary">
+                      <FaCommentDots /> Review Comments
+                    </h5>
+                    <Alert
+                      variant="light"
+                      className="border border-secondary p-3"
                     >
-                      Comment
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={() => setShowNewDocModal(true)}
-                    >
-                      Ask for New Document
-                    </Button>
+                      {document?.reviewComments || "No comments available"}
+                    </Alert>
                   </div>
-                </p>
+                </Card.Body>
+              </Card>
+
+              {document?.file?.path && (
+                <table
+                  className="table table-bordered text-center"
+                  style={{ width: "100%", borderCollapse: "collapse" }}
+                >
+                  <thead>
+                    <tr
+                      style={{ backgroundColor: "#a0f0e0", fontWeight: "bold" }}
+                    >
+                      <th style={{ padding: "10px", border: "1px solid #ccc" }}>
+                        Documents
+                      </th>
+                      <th style={{ padding: "10px", border: "1px solid #ccc" }}>
+                        Action
+                      </th>
+                      <th style={{ padding: "10px", border: "1px solid #ccc" }}>
+                        Feedback
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[{ name: "Adhaar Document" }].map((doc, index) => (
+                      <tr
+                        key={index}
+                        style={{ borderBottom: "1px solid #ccc" }}
+                      >
+                        <td
+                          style={{ padding: "10px", border: "1px solid #ccc" }}
+                        >
+                          <strong>{doc.name}</strong>
+                        </td>
+                        <td
+                          style={{ padding: "10px", border: "1px solid #ccc" }}
+                        >
+                          <a
+                            href={document.file.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary"
+                            style={{
+                              textDecoration: "none",
+                              fontWeight: "500",
+                            }}
+                          >
+                            Click to View
+                          </a>
+                        </td>
+                        <td
+                          style={{ padding: "10px", border: "1px solid #ccc" }}
+                        >
+                          <span
+                            className="text-danger"
+                            style={{ cursor: "pointer", fontWeight: "500" }}
+                            onClick={() => setShowCommentModal(true)}
+                          >
+                            Document not looking good?
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
+            </div>
+          </div>
+
+          <Card className="p-3 shadow-sm mt-4">
+            <Card.Body className="d-flex justify-content-between align-items-center">
+              <h5 className="m-0">Need a New Document?</h5>
+              <Button
+                variant="primary"
+                onClick={() => setShowNewDocModal(true)}
+              >
+                Request New Document
+              </Button>
             </Card.Body>
           </Card>
 
@@ -397,43 +526,6 @@ const ApplicationDetailsPage = () => {
             </Modal.Footer>
           </Modal>
 
-          <Card className="p-3 shadow-sm mt-4">
-            <Card.Body>
-              <h5 className="text-primary">Loan & Application Details</h5>
-              <p>
-                <strong>Application Name:</strong>{" "}
-                {document.application?.name || "N/A"}
-              </p>
-              <p>
-                <strong>Loan Type:</strong>{" "}
-                {document.application?.loanType?.name || "N/A"}
-              </p>
-              <p>
-                <strong>Amount:</strong> ₹
-                {document.application?.amount || "N/A"}
-              </p>
-              <p>
-                <strong>Initiated By:</strong>{" "}
-                {document.application?.initiatedBy || "N/A"}
-              </p>
-              <p>
-                <strong>Application Status:</strong>{" "}
-                {document.application?.status || "N/A"}
-              </p>
-              <p>
-                <strong>Created At:</strong>{" "}
-                {document.application?.createdAt
-                  ? new Date(document.application.createdAt).toLocaleString()
-                  : "N/A"}
-              </p>
-              <p>
-                <strong>Updated At:</strong>{" "}
-                {document.application?.updatedAt
-                  ? new Date(document.application.updatedAt).toLocaleString()
-                  : "N/A"}
-              </p>
-            </Card.Body>
-          </Card>
           <div className="mt-4">
             <Link href="/dashboard/admin/applications">
               <Button variant="secondary" className="me-2">

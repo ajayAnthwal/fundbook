@@ -3,9 +3,7 @@ import { getBusinessTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
 import { getBusinessDetails, handleUpdateBusiness } from "@/api/loanService";
 import { useSearchParams } from "next/navigation";
-
 const BASE_URL = "http://194.195.112.4:3070";
-
 
 const formStyles = {
   container: {
@@ -92,7 +90,7 @@ export default function FormStep2({
   const [submitting, setSubmitting] = useState(false);
   const [businessTypes, setBusinessTypes] = useState([]);
   const [businessId, setBusinessId] = useState(null);
-  const [businessData, setBusinessData] = useState(null); 
+  const [businessData, setBusinessData] = useState(null);
   const [localFormData, setLocalFormData] = useState({
     email: "",
     mobile: "",
@@ -105,48 +103,57 @@ export default function FormStep2({
   const searchParams = useSearchParams();
   const isApplicationEdit = searchParams.get("isApplicationEdit");
 
-
-  
-// fetch all data
+  // fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const businessDetails = await getBusinessDetails();
         console.log("Fetched Business Details:", businessDetails);
+
         if (businessDetails && businessDetails.length > 0) {
-          setBusinessId(businessDetails[0].id); 
-          setBusinessData(businessDetails[0]); 
+          let businessDetailId = 323;
+         const currentBusinessData =  businessDetails.filter(
+            (businessDetail) => businessDetail.id == businessDetailId)[0];
+          setBusinessId(businessDetails[0].id);
+          setBusinessData(businessDetails[0]);
+          if (isApplicationEdit) {
+            setLocalFormData({
+              email: businessDetails[0].email || "",
+              mobile: businessDetails[0].mobile || "",
+              businessType: businessDetails[0].businessType?.id || "",
+              gst: businessDetails[0].gst || "",
+              udyam: businessDetails[0].udyam || "",
+              applicationId: businessDetails[0].application?.id || "",
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching business details:", error);
       }
     };
     fetchData();
-  }, []);
-  
-  const handleUpdateBusiness = async () => {
-    if (!businessId) {
-      return;
-    }
-    const updatedData = {
-      email: localFormData.email || "",
-      mobile: String(localFormData.mobile) || "",
-      businessType: { id: localFormData.businessType || "" },
-      gst: localFormData.gst || "",
-      udyam: localFormData.udyam || "",
-      application: { id: localFormData.applicationId || "" },
-    };
-  
-    try {
-      const response = await handleUpdateBusiness(updatedData, businessId); 
-      console.log("Business Updated Successfully:", response);
-    } catch (error) {
-      console.error("Error updating business:", error);
-    }
-  };
-  
-  
-  
+  }, [isApplicationEdit]);
+
+  // const handleSubmit2 = async () => {
+  //   if (!businessId) {
+  //     return;
+  //   }
+  //   const updatedData = {
+  //     email: businessData[0]?.email || "",
+  //     mobile: businessData[0]?.mobile || "",
+  //     businessType: businessData[0]?.businessType?.id || "",
+  //     gst: businessData[0]?.gst || "",
+  //     udyam: businessData[0]?.udyam || "",
+  //     applicationId: businessData[0]?.application?.id || "",
+  //   };
+  //   try {
+  //     const response = await handleUpdateBusiness(updatedData, businessId);
+  //     console.log("Business Updated Successfully:", response);
+  //   } catch (error) {
+  //     console.error("Error updating business:", error);
+  //   }
+  // };
+
   useEffect(() => {
     if (formData) {
       setLocalFormData(formData);
@@ -172,10 +179,8 @@ export default function FormStep2({
     }
   }, [formData]);
 
-
-
   useEffect(() => {
-    (async function () {
+    (async () => {
       const res = await getBusinessTypes();
       if (res?.data?.length) {
         setBusinessTypes(res?.data);
@@ -187,7 +192,6 @@ export default function FormStep2({
       }
     })();
   }, []);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -204,7 +208,6 @@ export default function FormStep2({
     e.preventDefault();
     setSubmitting(true);
     setError("");
-
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
@@ -255,21 +258,22 @@ export default function FormStep2({
       if (localFormData.udyam) {
         businessData.udyam = localFormData.udyam;
       }
-      const response = await fetch(`${BASE_URL}/api/v1/business-details`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(businessData),
-      });
-      const responseText = await response.text();
-      let responseData;
-      try {
-        responseData = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error("Invalid response from server");
+
+      let response;
+      if (isApplicationEdit && businessId) {
+        response = await handleUpdateBusiness(businessData, businessId);
+        console.log("res", response);
+      } else {
+        response = await fetch(`${BASE_URL}/api/v1/business-details`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(businessData),
+        });
       }
+      let responseData;
       if (!response.ok) {
         throw new Error(
           responseData.message || "Failed to submit business details"
@@ -433,7 +437,11 @@ export default function FormStep2({
               }}
               disabled={submitting}
             >
-              {submitting ? "Submitting..." : "Next"}
+              {submitting
+                ? "Submitting..."
+                : isApplicationEdit
+                ? "Update"
+                : "Next"}
             </button>
           </div>
         </form>

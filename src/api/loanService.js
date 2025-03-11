@@ -35,31 +35,94 @@ export const updateApplication = async (data, id) => {
   }
 };
 
-
-export const handleUpdateBusiness  = async (data, id) => {
+export const getBusinessDetails = async (applicationId) => {
   try {
-    const res = await axiosClientWithHeaders.patch(`/business-details/${id}`, data);
-    return res.data;
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("Auth token is missing.");
+      return null;
+    }
+    const filters = {
+      application: { id: applicationId },
+    };
+    const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+
+    const response = await fetch(
+      `http://194.195.112.4:3070/api/v1/business-details?page=1&filters=${encodedFilters}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ Token को manually pass करें
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
-    toast.error("Failed to Update application");
-    new Error(error.response.data.message);
+    console.error("Error fetching business details:", error);
     return null;
   }
 };
 
 
-export const getBusinessDetails = async (data) => {
+
+export const getKycDetails = async (applicationId) => { 
   try {
-    const res = await axiosClientWithHeaders.get(`/business-details`, data);
-    console.log("getBusinessDetails", res.data.data);
-    return res.data.data;
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("Auth token is missing.");
+      return null;
+    }
+
+    // Filters object for API request
+    const filters = {
+      application: { id: applicationId },
+    };
+    const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+
+    // API URL with filters
+    const apiUrl = `${BASE_URL}/api/v1/application-kycs?filters=${encodedFilters}`;
+    console.log("Fetching KYC details from:", apiUrl);
+
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Fetched KYC Details:", data);
+    return data;
   } catch (error) {
-    console.log("error", error);
-    toast.error(error.response?.data?.message || "Something went wrong");
-    throw new Error(error.response?.data?.message || "API Error");
+    console.error("Error fetching KYC details:", error);
+    return null;
   }
 };
 
+
+
+export const handleUpdateBusiness = async (businessData, businessId) => {
+  try {
+    const res = await axiosClientWithHeaders.patch(
+      `/business-details/${businessId}`,
+      businessData
+    );
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to update business details");
+  }
+};
 
 export const getBusinessTypes = async () => {
   try {

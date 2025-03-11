@@ -1,9 +1,10 @@
 "use client";
 import { getBusinessTypes } from "@/api/loanService";
 import { useState, useEffect } from "react";
-import { getBusinessDetails, handleUpdateBusiness } from "@/api/loanService";
+import { handleUpdateBusiness } from "@/api/loanService";
 import { useSearchParams } from "next/navigation";
 const BASE_URL = "http://194.195.112.4:3070";
+
 
 const formStyles = {
   container: {
@@ -99,23 +100,77 @@ export default function FormStep2({
     udyam: "",
     applicationId: "",
   });
+  const [applicationId, setApplicationId] = useState("");
 
   const searchParams = useSearchParams();
   const isApplicationEdit = searchParams.get("isApplicationEdit");
+
+  console.log(localStorage.getItem("authToken"), "token");
 
   // fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const businessDetails = await getBusinessDetails();
+        // Get token from localStorage
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          console.error("Auth token is missing.");
+          return;
+        }
+        let currentApplicationId = "";
+        const prevFormData = localStorage.getItem("applicationData");
+        if (prevFormData) {
+          try {
+            const parsedData = JSON.parse(prevFormData);
+            if (parsedData.id) {
+              currentApplicationId = parsedData.id;
+            } else if (parsedData.application && parsedData.application.id) {
+              currentApplicationId = parsedData.application.id;
+            }
+          } catch (e) {
+            console.error("Failed to parse application data:", e);
+          }
+        }
+
+        setApplicationId(
+          currentApplicationId || "108f3a04-34f0-4377-9bf1-539ae66e1784"
+        );
+
+        // Create the filter object with the application ID
+        const filters = {
+          application: {
+            id: currentApplicationId || "108f3a04-34f0-4377-9bf1-539ae66e1784",
+          },
+        };
+
+        // Encode the filters object for the URL
+        const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+
+        // Make the API call with the filters and token
+        const response = await fetch(
+          `http://194.195.112.4:3070/api/v1/business-details?page=1&filters=${encodedFilters}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // ✅ Token added here
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const businessDetails = data.data || data.results || data; // Adjust based on your API response structure
+
         console.log("Fetched Business Details:", businessDetails);
 
         if (businessDetails && businessDetails.length > 0) {
-          let businessDetailId = 323;
-         const currentBusinessData =  businessDetails.filter(
-            (businessDetail) => businessDetail.id == businessDetailId)[0];
           setBusinessId(businessDetails[0].id);
           setBusinessData(businessDetails[0]);
+
           if (isApplicationEdit) {
             setLocalFormData({
               email: businessDetails[0].email || "",
@@ -123,7 +178,10 @@ export default function FormStep2({
               businessType: businessDetails[0].businessType?.id || "",
               gst: businessDetails[0].gst || "",
               udyam: businessDetails[0].udyam || "",
-              applicationId: businessDetails[0].application?.id || "",
+              applicationId:
+                businessDetails[0].application?.id ||
+                currentApplicationId ||
+                "",
             });
           }
         }
@@ -131,28 +189,9 @@ export default function FormStep2({
         console.error("Error fetching business details:", error);
       }
     };
+
     fetchData();
   }, [isApplicationEdit]);
-
-  // const handleSubmit2 = async () => {
-  //   if (!businessId) {
-  //     return;
-  //   }
-  //   const updatedData = {
-  //     email: businessData[0]?.email || "",
-  //     mobile: businessData[0]?.mobile || "",
-  //     businessType: businessData[0]?.businessType?.id || "",
-  //     gst: businessData[0]?.gst || "",
-  //     udyam: businessData[0]?.udyam || "",
-  //     applicationId: businessData[0]?.application?.id || "",
-  //   };
-  //   try {
-  //     const response = await handleUpdateBusiness(updatedData, businessId);
-  //     console.log("Business Updated Successfully:", response);
-  //   } catch (error) {
-  //     console.error("Error updating business:", error);
-  //   }
-  // };
 
   useEffect(() => {
     if (formData) {
@@ -179,6 +218,8 @@ export default function FormStep2({
     }
   }, [formData]);
 
+
+  
   useEffect(() => {
     (async () => {
       const res = await getBusinessTypes();
@@ -204,6 +245,8 @@ export default function FormStep2({
     }
   };
 
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -213,57 +256,44 @@ export default function FormStep2({
       if (!token) {
         throw new Error("Please login to submit business details");
       }
+      
       const applicationData = localStorage.getItem("applicationData");
       if (!applicationData) {
-        throw new Error(
-          "Application data not found. Please complete step 1 first."
-        );
+        throw new Error("Application data not found. Please complete step 1 first.");
       }
+  
       let applicationId;
       try {
         const parsedData = JSON.parse(applicationData);
-        if (parsedData.id) {
-          applicationId = parsedData.id;
-        } else if (parsedData.application && parsedData.application.id) {
-          applicationId = parsedData.application.id;
-        } else {
-          throw new Error("Invalid application data structure");
-        }
+        applicationId = parsedData?.id || parsedData?.application?.id;
+        if (!applicationId) throw new Error("Invalid application data structure");
       } catch (e) {
         throw new Error("Invalid application data format");
       }
-
-      if (
-        !localFormData.email ||
-        !localFormData.mobile ||
-        !localFormData.businessType
-      ) {
+  
+      if (!localFormData.email || !localFormData.mobile || !localFormData.businessType) {
         throw new Error("Please fill all required fields");
       }
-
+  
       const businessData = {
         email: localFormData.email,
         mobile: String(localFormData.mobile),
-        businessType: {
-          id: localFormData.businessType,
-        },
-        application: {
-          id: applicationId,
-        },
+        businessType: { id: localFormData.businessType },
+        application: { id: applicationId },
       };
-
-      if (localFormData.gst) {
-        businessData.gst = localFormData.gst;
-      }
-      if (localFormData.udyam) {
-        businessData.udyam = localFormData.udyam;
-      }
-
-      let response;
+  
+      if (localFormData.gst) businessData.gst = localFormData.gst;
+      if (localFormData.udyam) businessData.udyam = localFormData.udyam;
+  
+      let response, responseData;
       if (isApplicationEdit && businessId) {
-        response = await handleUpdateBusiness(businessData, businessId);
-        console.log("res", response);
+        responseData = await handleUpdateBusiness(businessData, businessId);
+        console.log("res", responseData);
       } else {
+        if (typeof BASE_URL === "undefined") {
+          throw new Error("BASE_URL is not defined");
+        }
+        
         response = await fetch(`${BASE_URL}/api/v1/business-details`, {
           method: "POST",
           headers: {
@@ -272,14 +302,17 @@ export default function FormStep2({
           },
           body: JSON.stringify(businessData),
         });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to submit business details");
+        }
+        
+        responseData = await response.json();
       }
-      let responseData;
-      if (!response.ok) {
-        throw new Error(
-          responseData.message || "Failed to submit business details"
-        );
-      }
+  
       localStorage.setItem("businessData", JSON.stringify(responseData));
+  
       if (nextStep) {
         nextStep();
       }
@@ -290,7 +323,7 @@ export default function FormStep2({
       setSubmitting(false);
     }
   };
-
+  
   return (
     <div style={formStyles.container}>
       <div style={formStyles.card}>

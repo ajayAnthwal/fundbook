@@ -17,45 +17,104 @@ export default function FormStep4({
   const [uploading, setUploading] = useState(false);
   const [documentMappings, setDocumentMappings] = useState([]);
   const [uploadedDocuments, setUploadedDocuments] = useState({});
+  const [existingDocuments, setExistingDocuments] = useState([]);
+  const [userApplicationData, setUserApplicationData] = useState(false);
 
   useEffect(() => {
-    const fetchDocumentMappings = async () => {
+    console.log("Fetching API...");
+
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) {
-          console.error("❌ No auth token found");
-          toast.error("Authentication error, please login again.");
-          return;
+        if (!token) throw new Error("Authentication token missing.");
+
+        const storedData = localStorage.getItem("applicationData");
+        let applicationId = "";
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData);
+            applicationId = parsedData?.id || parsedData?.application?.id || "";
+            console.log("Extracted Application ID:", applicationId);
+          } catch (e) {
+            console.error("Error parsing application data:", e);
+          }
+        }
+        if (!applicationId) throw new Error("Application ID not found.");
+
+        const filters = encodeURIComponent(
+          JSON.stringify({ application: { id: applicationId } })
+        );
+        console.log("Filters:", filters);
+        const response = await fetch(
+          `http://194.195.112.4:3070/api/v1/application-documents?page=1&filters=${filters}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("API Response:", response);
+        if (!response.ok) throw new Error("Failed to fetch documents");
+
+        const data = await response.json();
+        console.log("API Data:", data);
+
+        if (data?.data?.length) {
+          setUserApplicationData(true);
+          setExistingDocuments(data.data);
+
+          // Pre-populate uploadedDocuments state
+          const existingUploads = {};
+          data.data.forEach((doc) => {
+            existingUploads[doc.type] = doc.name;
+          });
+          setUploadedDocuments(existingUploads);
+        } else {
+          setUserApplicationData(false);
         }
 
+        // Fetch document mappings (required for both new and edit)
         const loanTypeId = localStorage.getItem("selectedLoanTypeId");
         const businessTypeId = localStorage.getItem("selectedBusinessTypeId");
 
         if (!loanTypeId || !businessTypeId) {
-          console.error("❌ LoanTypeId or BusinessTypeId missing!");
-          toast.error("Loan and Business Type IDs are missing.");
-          return;
+          throw new Error("Loan Type ID or Business Type ID missing");
         }
 
-        console.log("🚀 Loan Type ID:", loanTypeId);
-        console.log("🚀 Business Type ID:", businessTypeId);
+        const mappingFilters = encodeURIComponent(
+          JSON.stringify({
+            businessType: { id: businessTypeId },
+            loanType: { id: loanTypeId },
+          })
+        );
 
-        const url = `http://194.195.112.4:3070/api/v1/document-mappings?filters={"businessType":{"id":"${businessTypeId}"},"loanType":{"id":"${loanTypeId}"}}`;
-        console.log("📡 Fetching API with URL:", url);
+        const mappingResponse = await fetch(
+          `http://194.195.112.4:3070/api/v1/document-mappings?page=1&filters=${mappingFilters}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!mappingResponse.ok)
+          throw new Error("Failed to fetch document mappings");
 
-        console.log("✅ API Response:", response.data);
-        setDocumentMappings(response.data.data);
-      } catch (error) {
-        console.error("❌ Error fetching document mappings:", error);
-        toast.error("Failed to load document requirements.");
+        const mappingData = await mappingResponse.json();
+        console.log("Document Mappings Data:", mappingData);
+        setDocumentMappings(mappingData.data || []);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        toast.error(err.message || "Failed to load data");
       }
     };
 
-    fetchDocumentMappings();
+    fetchData();
   }, []);
 
   const handleFileChange = async (e, docType) => {
@@ -72,7 +131,9 @@ export default function FormStep4({
       if (!uploadResponse?.file?.id) throw new Error("Invalid upload response");
 
       const applicationData = localStorage.getItem("applicationData");
-      const applicationId = applicationData ? JSON.parse(applicationData)?.id : null;
+      const applicationId = applicationData
+        ? JSON.parse(applicationData)?.id
+        : null;
       if (!applicationId) throw new Error("Application ID not found");
 
       const documentData = {
@@ -100,7 +161,9 @@ export default function FormStep4({
 
   return (
     <div className="container mt-4">
-      <h3 className="text-primary text-center mb-3">Step 4: Document Upload</h3>
+      <h3 className="text-primary text-center mb-3">
+        {userApplicationData ? "Edit Documents" : "Step 4: Document Upload"}
+      </h3>
       <div className="mb-3">
         {documentMappings.length > 0 ? (
           documentMappings.map((doc, index) => (
@@ -113,9 +176,16 @@ export default function FormStep4({
                 disabled={uploading || uploadedDocuments[doc.documentType.name]}
               />
               {uploadedDocuments[doc.documentType.name] && (
-                <span className="text-success ms-2">
-                  Uploaded: {uploadedDocuments[doc.documentType.name]}
-                </span>
+                <div className="ms-2">
+                  <span className="text-success">
+                    Uploaded: {uploadedDocuments[doc.documentType.name]}
+                  </span>
+                  {userApplicationData && (
+                    <span className="ms-2 text-muted">
+                      (Previously uploaded)
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           ))
@@ -128,7 +198,7 @@ export default function FormStep4({
           Previous
         </button>
         <button className="btn btn-primary px-4 py-2" onClick={submitForm}>
-          Submit Loan Application
+          {userApplicationData ? "Update Application" : "Submit Application"}
         </button>
       </div>
     </div>

@@ -4,94 +4,71 @@ import { useState, useEffect } from "react";
 const BASE_URL = "http://194.195.112.4:3070";
 
 const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
-  const [localFormData, setLocalFormData] = useState({
-    pan: "",
-    name: "",
-  });
+  const [localFormData, setLocalFormData] = useState({ pan: "", name: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [userApplicationData, setUserApplicationData] = useState(false);
+  const [kycId, setKycId] = useState(""); // ID for PATCH API
 
-  const formStyles = {
-    container: {
-      maxWidth: "1200px",
-      margin: "2rem auto",
-      padding: "1rem",
-    },
-    card: {
-      background: "white",
-      borderRadius: "8px",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      padding: "2rem",
-    },
-    title: {
-      textAlign: "center",
-      marginBottom: "2rem",
-      fontSize: "1.5rem",
-      fontWeight: "bold",
-    },
-    formGroup: {
-      marginBottom: "1rem",
-    },
-    label: {
-      display: "block",
-      marginBottom: "0.5rem",
-      fontWeight: "bold",
-    },
-    input: {
-      width: "100%",
-      padding: "0.75rem",
-      fontSize: "1rem",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      height: "50px",
-    },
-    select: {
-      width: "100%",
-      padding: "0.75rem",
-      fontSize: "1rem",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      height: "50px",
-    },
-    button: {
-      width: "100%",
-      padding: "0.75rem",
-      fontSize: "1rem",
-      backgroundColor: "#0d6efd",
-      color: "white",
-      border: "none",
-      borderRadius: "4px",
-      cursor: "pointer",
-      height: "50px",
-    },
-    buttonDisabled: {
-      opacity: 0.7,
-      cursor: "not-allowed",
-    },
-    error: {
-      backgroundColor: "#f8d7da",
-      color: "#842029",
-      padding: "1rem",
-      borderRadius: "4px",
-      marginBottom: "1rem",
-    },
-    row: {
-      display: "flex",
-      flexWrap: "wrap",
-      margin: "0 -0.5rem",
-    },
-    col: {
-      flex: "1 1 300px",
-      padding: "0 0.5rem",
-    },
-  };
-
-  
   useEffect(() => {
-    if (formData) {
-      setLocalFormData(formData);
-    }
-  }, [formData]);
+    console.log("Fetching API...");
+
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) throw new Error("Authentication token missing.");
+
+        const storedData = localStorage.getItem("applicationData");
+        let applicationId = "";
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData);
+            applicationId = parsedData?.id || parsedData?.application?.id || "";
+            console.log("Extracted Application ID:", applicationId);
+          } catch (e) {
+            console.error("Error parsing application data:", e);
+          }
+        }
+        if (!applicationId) throw new Error("Application ID not found.");
+
+        const filters = encodeURIComponent(
+          JSON.stringify({ application: { id: applicationId } })
+        );
+        console.log("Filters:", filters);
+        const response = await fetch(
+          `${BASE_URL}/api/v1/application-kycs?page=1&filters=${filters}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("API Response:", response);
+        if (!response.ok) throw new Error("Failed to fetch business details");
+
+        const data = await response.json();
+        console.log("API Data:", data);
+
+        if (data?.data?.length) {
+          setUserApplicationData(true); // ✅ Existing data found
+          setKycId(data.data[0].id); // ✅ Store KYC ID for PATCH
+          setLocalFormData({
+            pan: data.data[0].pan || "",
+            name: data.data[0].name || "",
+          });
+        } else {
+          setUserApplicationData(false); // ✅ No existing data
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,82 +76,76 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
     setError("");
 
     try {
+      console.log("Submitting Form Data:", localFormData);
+
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Please login to submit KYC details");
-      }
+      if (!token) throw new Error("Please login to submit KYC details.");
 
-      const applicationData = localStorage.getItem("applicationData");
-      if (!applicationData) {
-        throw new Error(
-          "Application data not found. Please complete previous steps first."
-        );
-      }
-
-      let applicationId;
-      try {
-        const parsedData = JSON.parse(applicationData);
-        console.log("Parsed application data:", parsedData);
-
-        if (parsedData.id) {
-          applicationId = parsedData.id;
-        } else if (parsedData.application && parsedData.application.id) {
-          applicationId = parsedData.application.id;
-        } else {
-          throw new Error("Invalid application data structure");
+      const storedData = localStorage.getItem("applicationData");
+      let applicationId = "";
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          applicationId = parsedData?.id || parsedData?.application?.id || "";
+          console.log("Application ID for submission:", applicationId);
+        } catch (e) {
+          throw new Error("Invalid application data format.");
         }
-      } catch (e) {
-        console.error("Failed to parse application data:", e);
-        throw new Error("Invalid application data format");
       }
+      if (!applicationId) throw new Error("Application ID missing.");
 
       if (!localFormData.pan || !localFormData.name) {
-        throw new Error("Please fill all required fields");
+        throw new Error("All fields are required.");
       }
 
-      const kycData = {
-        pan: localFormData.pan.toUpperCase(),
-        name: localFormData.name,
-        application: {
-          id: applicationId,
-        },
-      };
-
-      console.log("Submitting KYC details:", kycData);
-      console.log("API URL:", `${BASE_URL}/api/v1/application-kycs`);
-
-      const response = await fetch(`${BASE_URL}/api/v1/application-kycs`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(kycData),
-      });
-
-      console.log("Response Status:", response.status);
-      const responseText = await response.text();
-      console.log("Raw Response:", responseText);
-
-      let responseData;
-      try {
-        responseData = JSON.parse(responseText);
-        console.log("Parsed API Response:", responseData);
-      } catch (e) {
-        console.error("Failed to parse response:", e);
-        throw new Error("Invalid response from server");
+      let response;
+      if (userApplicationData) {
+        // ✅ PATCH request if data exists
+        console.log("Updating KYC via PATCH...");
+        response = await fetch(`${BASE_URL}/api/v1/application-kycs/${kycId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            pan: localFormData.pan.toUpperCase(),
+            name: localFormData.name,
+            application: { id: applicationId },
+          }),
+        });
+      } else {
+        // ✅ POST request if no data exists
+        console.log("Creating KYC via POST...");
+        response = await fetch(`${BASE_URL}/api/v1/application-kycs`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            pan: localFormData.pan.toUpperCase(),
+            name: localFormData.name,
+            application: { id: applicationId },
+          }),
+        });
       }
+
+      console.log("Form Submission Response:", response);
       if (!response.ok) {
-        throw new Error(responseData.message || "Failed to submit KYC details");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit KYC.");
       }
-      console.log("KYC details submitted successfully:", responseData);
-      localStorage.setItem("kycData", JSON.stringify(responseData));
-      if (nextStep) {
-        nextStep();
-      }
+
+      console.log(
+        userApplicationData
+          ? "KYC Updated Successfully!"
+          : "KYC Submitted Successfully!"
+      );
+      if (nextStep) nextStep();
     } catch (err) {
-      console.error("KYC Submit Error:", err);
-      setError(err.message || "Failed to submit KYC details");
+      console.error("Submission Error:", err);
+      setError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -190,53 +161,49 @@ const FormStep3 = ({ formData, updateFormData, prevStep, nextStep }) => {
       )}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">
-            PAN Number
-            <input
-              type="text"
-              value={localFormData.pan}
-              onChange={(e) =>
-                setLocalFormData({ ...localFormData, pan: e.target.value })
-              }
-              className="w-full p-2 border rounded"
-              placeholder="Enter PAN Number"
-              maxLength="10"
-            />
-          </label>
+          <label className="block text-gray-700 mb-2">PAN Number</label>
+          <input
+            type="text"
+            value={localFormData.pan}
+            onChange={(e) =>
+              setLocalFormData({ ...localFormData, pan: e.target.value })
+            }
+            className="w-full p-2 border rounded"
+            placeholder="Enter PAN Number"
+            maxLength="10"
+            required
+          />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">
             Full Name (as per PAN)
-            <input
-              type="text"
-              value={localFormData.name}
-              onChange={(e) =>
-                setLocalFormData({ ...localFormData, name: e.target.value })
-              }
-              className="w-full p-2 border rounded"
-              placeholder="Enter Full Name"
-            />
           </label>
+          <input
+            type="text"
+            value={localFormData.name}
+            onChange={(e) =>
+              setLocalFormData({ ...localFormData, name: e.target.value })
+            }
+            className="w-full p-2 border rounded"
+            placeholder="Enter Full Name"
+            required
+          />
         </div>
-        <div style={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
+        <div className="d-flex gap-6 mt-4">
           {prevStep && (
             <button
               type="button"
               onClick={prevStep}
-              style={{
-                ...formStyles.button,
-                backgroundColor: "#6c757d",
-              }}
+              className="btn btn-secondary px-4 py-2"
             >
               Previous
             </button>
           )}
           <button
             type="submit"
-            style={{
-              ...formStyles.button,
-              ...(submitting ? formStyles.buttonDisabled : {}),
-            }}
+            className={`btn btn-primary px-4 py-2 ${
+              submitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             disabled={submitting}
           >
             {submitting ? "Submitting..." : "Next"}

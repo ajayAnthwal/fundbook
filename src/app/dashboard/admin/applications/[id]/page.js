@@ -159,7 +159,7 @@ const ApplicationDetailsPage = () => {
         }
       );
 
-      setNewDoc({ name: "", type: "", comments: "" }); // Reset the form after submission
+      setNewDoc({ name: "", type: "", comments: "" }); 
       setShowNewDocModal(false);
       toast.success("Document submitted successfully!");
     } catch (err) {
@@ -172,7 +172,7 @@ const ApplicationDetailsPage = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4 text-primary">Application Document Details</h2>
+      <h2 className="mb-4 text-primary">Application Details</h2>
 
       {loading && <Spinner animation="border" variant="primary" />}
       {error && <Alert variant="danger">{error}</Alert>}

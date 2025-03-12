@@ -6,7 +6,6 @@ import {
   saveApplicationDocumentService,
 } from "@/api/fileService";
 import toast from "react-hot-toast";
-import axios from "axios";
 
 export default function FormStep4({
   formData,
@@ -45,71 +44,88 @@ export default function FormStep4({
           JSON.stringify({ application: { id: applicationId } })
         );
         console.log("Filters:", filters);
-        const response = await fetch(
-          `http://194.195.112.4:3070/api/v1/application-documents?page=1&filters=${filters}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+
+        // First, try to fetch existing application documents
+        try {
+          const response = await fetch(
+            `http://194.195.112.4:3070/api/v1/application-documents?page=1&filters=${filters}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          console.log("API Response:", response);
+          if (!response.ok) throw new Error("Failed to fetch documents");
+
+          const data = await response.json();
+          console.log("API Data:", data);
+
+          if (data?.data?.length) {
+            // We have existing documents - we're in edit mode
+            setUserApplicationData(true);
+            setExistingDocuments(data.data);
+
+            // Pre-populate uploadedDocuments state
+            const existingUploads = {};
+            data.data.forEach((doc) => {
+              existingUploads[doc.type] = doc.name;
+            });
+            setUploadedDocuments(existingUploads);
+
+            // In edit mode, we don't need to fetch document mappings
+            return;
           }
-        );
-
-        console.log("API Response:", response);
-        if (!response.ok) throw new Error("Failed to fetch documents");
-
-        const data = await response.json();
-        console.log("API Data:", data);
-
-        if (data?.data?.length) {
-          setUserApplicationData(true);
-          setExistingDocuments(data.data);
-
-          // Pre-populate uploadedDocuments state
-          const existingUploads = {};
-          data.data.forEach((doc) => {
-            existingUploads[doc.type] = doc.name;
-          });
-          setUploadedDocuments(existingUploads);
-        } else {
-          setUserApplicationData(false);
+        } catch (err) {
+          console.error("Error fetching application documents:", err);
+          // Don't show error toast here, as we'll try document mappings next
         }
 
-        // Fetch document mappings (required for both new and edit)
-        const loanTypeId = localStorage.getItem("selectedLoanTypeId");
-        const businessTypeId = localStorage.getItem("selectedBusinessTypeId");
+        // If we reach here, we're in new document mode
+        setUserApplicationData(false);
 
-        if (!loanTypeId || !businessTypeId) {
-          throw new Error("Loan Type ID or Business Type ID missing");
-        }
+        // Only fetch document mappings for new cases
+        try {
+          const loanTypeId = localStorage.getItem("selectedLoanTypeId");
+          const businessTypeId = localStorage.getItem("selectedBusinessTypeId");
 
-        const mappingFilters = encodeURIComponent(
-          JSON.stringify({
-            businessType: { id: businessTypeId },
-            loanType: { id: loanTypeId },
-          })
-        );
-
-        const mappingResponse = await fetch(
-          `http://194.195.112.4:3070/api/v1/document-mappings?page=1&filters=${mappingFilters}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+          if (!loanTypeId || !businessTypeId) {
+            throw new Error("Loan Type ID or Business Type ID missing");
           }
-        );
 
-        if (!mappingResponse.ok)
-          throw new Error("Failed to fetch document mappings");
+          const mappingFilters = encodeURIComponent(
+            JSON.stringify({
+              businessType: { id: businessTypeId },
+              loanType: { id: loanTypeId },
+            })
+          );
 
-        const mappingData = await mappingResponse.json();
-        console.log("Document Mappings Data:", mappingData);
-        setDocumentMappings(mappingData.data || []);
+          const mappingResponse = await fetch(
+            `http://194.195.112.4:3070/api/v1/document-mappings?page=1&filters=${mappingFilters}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!mappingResponse.ok)
+            throw new Error("Failed to fetch document mappings");
+
+          const mappingData = await mappingResponse.json();
+          console.log("Document Mappings Data:", mappingData);
+          setDocumentMappings(mappingData.data || []);
+        } catch (err) {
+          console.error("Error fetching document mappings:", err);
+          toast.error(err.message || "Failed to load document mappings");
+        }
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error in main fetch flow:", err);
         toast.error(err.message || "Failed to load data");
       }
     };
@@ -165,7 +181,19 @@ export default function FormStep4({
         {userApplicationData ? "Edit Documents" : "Step 4: Document Upload"}
       </h3>
       <div className="mb-3">
-        {documentMappings.length > 0 ? (
+        {userApplicationData ? (
+          // Show existing documents directly without loading message
+          existingDocuments.map((doc, index) => (
+            <div key={index} className="d-flex align-items-center mb-3">
+              <span className="fw-bold me-3">{doc.type}</span>
+              <div className="ms-2">
+                <span className="text-success">Uploaded: {doc.name}</span>
+                <span className="ms-2 text-muted">(Type: {doc.type})</span>
+              </div>
+            </div>
+          ))
+        ) : documentMappings.length > 0 ? (
+          // For new uploads, show document mappings
           documentMappings.map((doc, index) => (
             <div key={index} className="d-flex align-items-center mb-3">
               <span className="fw-bold me-3">{doc.documentType.name}</span>
@@ -180,11 +208,6 @@ export default function FormStep4({
                   <span className="text-success">
                     Uploaded: {uploadedDocuments[doc.documentType.name]}
                   </span>
-                  {userApplicationData && (
-                    <span className="ms-2 text-muted">
-                      (Previously uploaded)
-                    </span>
-                  )}
                 </div>
               )}
             </div>

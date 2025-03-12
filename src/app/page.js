@@ -7,13 +7,19 @@ import Slider from "./components/Hero/Slider";
 import SuccessStories from "./components/Hero/SuccessStories";
 import AdvancedAnalytics from "./components/Hero/AdvancedAnalytics";
 import Logos from "./components/Hero/Logos";
-export default function Home() {
+import WhatWeOffer from "./components/Hero/what_we_offer";
+import HomePageBlogs from "./components/cards/home_page_blogs";
+
+export default async function Home() {
+
   return (
     <>
       <Slider />
-      <Card />
+      <WhatWeOffer />
+      {/* <Card /> */}
       <Banner />
       <AdvancedAnalytics />
+      <HomePageBlogs />
       <SuccessStories />
       <Logos />
       <Features />

@@ -39,7 +39,7 @@ export default function Header() {
         <nav className="js-mega-menu navbar-nav-wrap">
           {/* Default Logo */}
           <Link className="navbar-brand" href="/" aria-label="Front" onClick={closeMenu}>
-            <Image className="navbar-brand-logo" src="/fundbook.png" alt="Logo" width={200} height={80} />
+            <Image className="navbar-brand-logo" src="/logo1.png" alt="Logo" width={1500} height={80} />
           </Link>
 
           {/* Toggler */}
@@ -72,8 +72,8 @@ export default function Header() {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-black" href="#" onClick={closeMenu}>
-                  Blog
+                <Link className="nav-link text-black" href="/blogs" onClick={closeMenu}>
+                  Blogs
                 </Link>
               </li>
               <li className="nav-item">

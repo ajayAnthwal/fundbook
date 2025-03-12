@@ -9,30 +9,31 @@ const ApplicationDetails = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [id, setId] = useState(null);
 
-  // ID ko localStorage se uthao
-  const storedData = JSON.parse(localStorage.getItem("userData"));
-  const id = storedData?.id;
-
-  const API_URL = `http://194.195.112.4:3070/api/v1/application-additional-documents/${id}`;
-
+  useEffect(() => {
+    // Access localStorage only on client-side
+    if (typeof window !== "undefined") {
+      const storedData = JSON.parse(localStorage.getItem("userData"));
+      setId(storedData?.id || null);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!id) return; // Don't fetch if id is null
+
       setLoading(true);
-      setError(null); // Reset error before API call
+      setError(null);
 
       try {
-        if (!id) {
-          throw new Error("User ID not found in localStorage!");
-        }
-
         const authToken = localStorage.getItem("authToken");
 
         if (!authToken) {
           throw new Error("Authentication token is missing. Please log in again.");
         }
 
+        const API_URL = `http://194.195.112.4:3070/api/v1/application-additional-documents/${id}`;
         const response = await axios.get(API_URL, {
           headers: {
             Authorization: `Bearer ${authToken}`,

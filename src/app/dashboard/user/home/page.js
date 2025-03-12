@@ -9,7 +9,7 @@ export default function UserDashboard() {
           <div className="card shadow-lg border-0 rounded-3">
             <div className="card-body text-center p-4">
               <h2 className="mb-3 text-black fw-bold">
-                👤 User Dashboard
+                👤 Dashboard
               </h2>
               <p className="text-muted fs-5">
                 Welcome to your personalized dashboard. Here you can manage your loan applications, check notifications, and update your profile.

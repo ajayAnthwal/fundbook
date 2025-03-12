@@ -58,7 +58,7 @@ const ApplicationDocumentsPage = () => {
             <thead className="table-dark">
               <tr>
                 <th className="text-white text-center">#</th>
-                <th className="text-white text-center">Document ID</th>
+                <th className="text-white text-center">ID</th>
                 <th className="text-white text-center">Name</th>
                 <th className="text-white text-center">Status</th>
                 <th className="text-white text-center">Created At</th>
@@ -68,9 +68,9 @@ const ApplicationDocumentsPage = () => {
             <tbody>
               {documents.length > 0 ? (
                 documents.map((doc, index) => (
-                  <tr key={doc.id || index}>
+                  <tr key={doc.firstName || index}>
                     <td>{(currentPage - 1) * pageSize + index + 1}</td>
-                    <td>{doc.id || "N/A"}</td>
+                    <td>{doc.application.user.firstName || "N/A"}</td>
                     <td>{doc.application?.name || "N/A"}</td>
                     <td>
                       <span

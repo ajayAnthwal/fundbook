@@ -1,6 +1,6 @@
 import LoanForm from "./LoanForm";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import { Suspense } from "react";
 export default function ApplyLoanPage() {
   console.log();
   
@@ -11,7 +11,9 @@ export default function ApplyLoanPage() {
           className="card shadow-lg p-4"
           style={{ maxWidth: "500px", width: "100%" }}
         >
+            <Suspense fallback={<div>Loading Documents...</div>}>
           <LoanForm />
+          </Suspense>
         </div>
       </div>
     </>

@@ -159,7 +159,7 @@ const ApplicationDetailsPage = () => {
         }
       );
 
-      setNewDoc({ name: "", type: "", comments: "" }); 
+      setNewDoc({ name: "", type: "", comments: "" });
       setShowNewDocModal(false);
       toast.success("Document submitted successfully!");
     } catch (err) {
@@ -265,19 +265,16 @@ const ApplicationDetailsPage = () => {
                   </Row>
 
                   {/* Review Comments Section */}
-                  <div className="mt-4">
-                    <h5 className="text-secondary">
-                      <FaCommentDots /> Review Comments
-                    </h5>
-                    <Alert
-                      variant="light"
-                      className="border border-secondary p-3"
-                    >
-                      {document?.reviewComments || "No comments available"}
-                    </Alert>
-                  </div>
                 </Card.Body>
               </Card>
+              <div className="mt-4">
+                <div className="d-flex align-items-center text-secondary fw-bold">
+                  <FaCommentDots className="me-2" /> Review Comments
+                </div>
+                <div className="alert alert-light border border-secondary p-3 mt-2">
+                  {document?.reviewComments || "No comments available"}
+                </div>
+              </div>
 
               {document?.file?.path && (
                 <table

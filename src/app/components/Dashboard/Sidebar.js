@@ -6,7 +6,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [role, setRole] = useState("User");
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    // Retrieve role from localStorage
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      setRole(userData?.role?.name || "User"); // Default to "User" if role is missing
+    }
+  }, []);
 
   return (
     <div

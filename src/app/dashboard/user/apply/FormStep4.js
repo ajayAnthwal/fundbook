@@ -136,43 +136,64 @@ export default function FormStep4({
   const handleFileChange = async (e, docType) => {
     const file = e.target.files[0];
     if (file) {
-      await handleUpload(file, docType);
+      try {
+        setUploading(true);
+        console.log("Uploading file for document type:", docType);
+
+        // First upload the file
+        const uploadResponse = await fileUploadService(file);
+        console.log("File upload response:", uploadResponse);
+
+        if (!uploadResponse?.file?.id) {
+          throw new Error("Invalid upload response");
+        }
+
+        // Get application ID
+        const applicationData = localStorage.getItem("applicationData");
+        const parsedData = JSON.parse(applicationData);
+        const applicationId = parsedData?.id || parsedData?.application?.id;
+
+        if (!applicationId) {
+          throw new Error("Application ID not found");
+        }
+
+        // Prepare document data
+        const documentData = {
+          status:
+            JSON.parse(localStorage.getItem("user"))?.status?.name || "Pending",
+          reviewComments: "Uploaded Successfully",
+          file: { id: uploadResponse.file.id },
+          type: docType,
+          name: file.name,
+          application: { id: applicationId },
+        };
+
+        // Save document to application
+        const saveResponse = await saveApplicationDocumentService(documentData);
+        console.log("Document save response:", saveResponse);
+
+        // Update UI state
+        setUploadedDocuments((prev) => ({
+          ...prev,
+          [docType]: file.name,
+        }));
+
+        // If in edit mode, update existing documents
+        if (userApplicationData) {
+          setExistingDocuments((prev) => [
+            ...prev,
+            { ...documentData, id: saveResponse.id },
+          ]);
+        }
+
+        toast.success(`${docType} uploaded successfully!`);
+      } catch (error) {
+        console.error("Upload Error:", error);
+        toast.error(`Failed to upload ${docType}: ${error.message}`);
+      } finally {
+        setUploading(false);
+      }
     }
-  };
-
-  const handleUpload = async (file, docType) => {
-    setUploading(true);
-    try {
-      const uploadResponse = await fileUploadService(file);
-      if (!uploadResponse?.file?.id) throw new Error("Invalid upload response");
-
-      const applicationData = localStorage.getItem("applicationData");
-      const applicationId = applicationData
-        ? JSON.parse(applicationData)?.id
-        : null;
-      if (!applicationId) throw new Error("Application ID not found");
-
-      const documentData = {
-        status:
-          JSON.parse(localStorage.getItem("user"))?.status?.name || "Pending",
-        reviewComments: "Uploaded Successfully",
-        file: { id: uploadResponse.file.id },
-        type: docType,
-        name: file.name,
-        application: { id: applicationId },
-      };
-
-      await saveApplicationDocumentService(documentData);
-      setUploadedDocuments((prev) => ({
-        ...prev,
-        [docType]: file.name,
-      }));
-      toast.success("Document Uploaded Successfully!");
-    } catch (error) {
-      console.error("Upload Error:", error);
-      toast.error("Failed to upload document.");
-    }
-    setUploading(false);
   };
 
   return (
@@ -182,38 +203,66 @@ export default function FormStep4({
       </h3>
       <div className="mb-3">
         {userApplicationData ? (
-          // Show existing documents directly without loading message
+          // Show existing documents with upload option
           existingDocuments.map((doc, index) => (
-            <div key={index} className="d-flex align-items-center mb-3">
-              <span className="fw-bold me-3">{doc.type}</span>
-              <div className="ms-2">
-                <span className="text-success">Uploaded: {doc.name}</span>
-                <span className="ms-2 text-muted">(Type: {doc.type})</span>
+            <div key={index} className="row align-items-center mb-3">
+              <div className="col-md-3">
+                <span className="fw-bold">{doc.type}</span>
+              </div>
+              <div className="col-md-9">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-success">Current: {doc.name}</span>
+                  <input
+                    type="file"
+                    className="form-control"
+                    onChange={(e) => handleFileChange(e, doc.type)}
+                    disabled={uploading}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  />
+                </div>
               </div>
             </div>
           ))
         ) : documentMappings.length > 0 ? (
           // For new uploads, show document mappings
           documentMappings.map((doc, index) => (
-            <div key={index} className="d-flex align-items-center mb-3">
-              <span className="fw-bold me-3">{doc.documentType.name}</span>
-              <input
-                type="file"
-                className="form-control me-2"
-                onChange={(e) => handleFileChange(e, doc.documentType.name)}
-                disabled={uploading || uploadedDocuments[doc.documentType.name]}
-              />
-              {uploadedDocuments[doc.documentType.name] && (
-                <div className="ms-2">
-                  <span className="text-success">
-                    Uploaded: {uploadedDocuments[doc.documentType.name]}
-                  </span>
+            <div key={index} className="row align-items-center mb-3">
+              <div className="col-md-3">
+                <span className="fw-bold">{doc.documentType.name}</span>
+              </div>
+              <div className="col-md-9">
+                <div className="d-flex align-items-center gap-2">
+                  <input
+                    type="file"
+                    className="form-control"
+                    onChange={(e) => handleFileChange(e, doc.documentType.name)}
+                    disabled={uploading}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  />
+                  {uploadedDocuments[doc.documentType.name] && (
+                    <span className="text-success">
+                      Uploaded: {uploadedDocuments[doc.documentType.name]}
+                    </span>
+                  )}
+                  {uploading && (
+                    <div
+                      className="spinner-border spinner-border-sm text-primary"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ))
         ) : (
-          <p>Loading documents...</p>
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading documents...</span>
+            </div>
+            <p className="mt-2">Loading documents...</p>
+          </div>
         )}
       </div>
       <div className="d-flex justify-content-between align-items-center mt-4">

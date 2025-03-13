@@ -195,24 +195,31 @@ const ApplicationsPage = () => {
                       </span>
                     </td>
                     <td>{formatDate(app.createdAt)}</td>
-                    <td>
+                    <td className="d-flex align-items-center justify-content-center">
                       {reviewComments[app.id]?.length > 0 ? (
                         reviewComments[app.id].map((doc, i) => (
-                          <div key={i} className="mb-2">
-                            <strong>{doc.type}:</strong>{" "}
+                          <div
+                            key={i}
+                            className="mb-2 d-flex align-items-center justify-content-center flex-column gap-1"
+                          >
+                            <span className="badge bg-secondary">
+                              {doc.type}
+                            </span>
                             <span
-                              className={
+                              className={`badge ${
                                 doc.status === "Active"
-                                  ? "text-success"
-                                  : "text-danger"
-                              }
+                                  ? "bg-success"
+                                  : "bg-danger"
+                              }`}
                             >
                               {doc.comment}
                             </span>
                           </div>
                         ))
                       ) : (
-                        <p className="text-muted mb-0">No comments</p>
+                        <span className="badge bg-secondary text-center">
+                          No comments
+                        </span>
                       )}
                     </td>
 

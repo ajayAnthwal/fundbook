@@ -47,9 +47,7 @@ const ApplicationsPage = () => {
       console.log("Documents API response:", response.data);
 
       if (response.data?.data) {
-        // Get latest comment for each document type
         const latestComments = response.data.data.reduce((acc, doc) => {
-          // If we haven't seen this type before or this document is newer
           const existingDoc = acc[doc.type];
           if (
             !existingDoc ||
@@ -64,8 +62,6 @@ const ApplicationsPage = () => {
           }
           return acc;
         }, {});
-
-        // Convert the object to array and sort by createdAt
         const documentComments = Object.values(latestComments).sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -79,8 +75,6 @@ const ApplicationsPage = () => {
       console.error("Error fetching documents for ID", applicationId, ":", err);
     }
   };
-
-  // ✅ useEffect में सभी applications के लिए call करो
   useEffect(() => {
     applications.forEach((app) => {
       fetchApplicationDocuments(app.id);
@@ -190,7 +184,6 @@ const ApplicationsPage = () => {
                 );
                 return (
                   <tr key={app.id}>
-                   
                     <td>
                       {app.user?.firstName} {app.user?.lastName}
                     </td>

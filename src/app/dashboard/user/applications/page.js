@@ -28,37 +28,59 @@ const ApplicationsPage = () => {
       const authToken = localStorage.getItem("authToken");
       console.log("Fetching documents for application:", applicationId);
 
+      const filters = encodeURIComponent(
+        JSON.stringify({
+          application: { id: applicationId },
+        })
+      );
+
       const response = await axios.get(
-        `http://194.195.112.4:3070/api/v1/application-documents?applicationId=${applicationId}`,
+        `http://194.195.112.4:3070/api/v1/application-documents?filters=${filters}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
 
-      console.log("Raw API response:", response.data);
+      console.log("Documents API response:", response.data);
 
-      // Check if documents contain applicationId
-      const documents = response.data.data || [];
-      console.log("Filtered Documents for App ID:", applicationId, documents);
+      if (response.data?.data) {
+        // Get latest comment for each document type
+        const latestComments = response.data.data.reduce((acc, doc) => {
+          // If we haven't seen this type before or this document is newer
+          const existingDoc = acc[doc.type];
+          if (
+            !existingDoc ||
+            new Date(doc.createdAt) > new Date(existingDoc.createdAt)
+          ) {
+            acc[doc.type] = {
+              type: doc.type,
+              comment: doc.reviewComments,
+              status: doc.status,
+              createdAt: doc.createdAt,
+            };
+          }
+          return acc;
+        }, {});
 
-      // सही applicationId के documents store करो
-      setReviewComments((prevComments) => ({
-        ...prevComments,
-        [applicationId]: documents, // ✅ Fix: सभी documents पहले भी include करो और फिर filter करो
-      }));
+        // Convert the object to array and sort by createdAt
+        const documentComments = Object.values(latestComments).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        setReviewComments((prevComments) => ({
+          ...prevComments,
+          [applicationId]: documentComments,
+        }));
+      }
     } catch (err) {
-      console.error(
-        "Application Documents Error for ID",
-        applicationId,
-        ":",
-        err
-      );
+      console.error("Error fetching documents for ID", applicationId, ":", err);
     }
   };
 
-  // useEffect में call करो
+  // ✅ useEffect में सभी applications के लिए call करो
   useEffect(() => {
     applications.forEach((app) => {
       fetchApplicationDocuments(app.id);
@@ -148,7 +170,6 @@ const ApplicationsPage = () => {
         <table className="table table-striped table-hover table-bordered">
           <thead className="table-dark">
             <tr>
-              <th className="text-white">#</th>
               <th className="text-white">Applicant Name</th>
               <th className="text-white">Loan Amount</th>
               <th className="text-white">Loan Type</th>
@@ -169,7 +190,7 @@ const ApplicationsPage = () => {
                 );
                 return (
                   <tr key={app.id}>
-                    <td>{index + 1}</td>
+                   
                     <td>
                       {app.user?.firstName} {app.user?.lastName}
                     </td>
@@ -177,29 +198,28 @@ const ApplicationsPage = () => {
                     <td>{app.loanType?.name || "N/A"}</td>
                     <td>
                       <span className="badge bg-info text-white">
-                        {app.status?.name || "Processing"}
+                        {app.status || "Processing"}
                       </span>
                     </td>
                     <td>{formatDate(app.createdAt)}</td>
                     <td>
-                      {console.log(
-                        "App ID:",
-                        app.id,
-                        "Comments:",
-                        reviewComments[app.id]
-                      )}
                       {reviewComments[app.id]?.length > 0 ? (
                         reviewComments[app.id].map((doc, i) => (
-                          <p key={i} className="mb-1">
-                            {doc.reviewComments}
-                            <br />
-                            <small className="text-muted">
-                              {doc.type} - {formatDate(doc.createdAt)}
-                            </small>
-                          </p>
+                          <div key={i} className="mb-2">
+                            <strong>{doc.type}:</strong>{" "}
+                            <span
+                              className={
+                                doc.status === "Active"
+                                  ? "text-success"
+                                  : "text-danger"
+                              }
+                            >
+                              {doc.comment}
+                            </span>
+                          </div>
                         ))
                       ) : (
-                        <span>No comments</span>
+                        <p className="text-muted mb-0">No comments</p>
                       )}
                     </td>
 

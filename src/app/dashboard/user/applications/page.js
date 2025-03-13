@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   getUserApplications,
   getApplicationById,
@@ -7,9 +8,11 @@ import {
 } from "@/api/documents";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useRouter } from "next/navigation";
+import * as bootstrap from "bootstrap";
 
 const ApplicationsPage = () => {
   const [applications, setApplications] = useState([]);
+  const [reviewComments, setReviewComments] = useState({});
   const [selectedApp, setSelectedApp] = useState(null);
   const [editApp, setEditApp] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,10 +23,53 @@ const ApplicationsPage = () => {
     fetchApplications();
   }, []);
 
+  const fetchApplicationDocuments = async (applicationId) => {
+    try {
+      const authToken = localStorage.getItem("authToken");
+      console.log("Fetching documents for application:", applicationId);
+
+      const response = await axios.get(
+        `http://194.195.112.4:3070/api/v1/application-documents?applicationId=${applicationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      console.log("Raw API response:", response.data);
+
+      // Check if documents contain applicationId
+      const documents = response.data.data || [];
+      console.log("Filtered Documents for App ID:", applicationId, documents);
+
+      // सही applicationId के documents store करो
+      setReviewComments((prevComments) => ({
+        ...prevComments,
+        [applicationId]: documents, // ✅ Fix: सभी documents पहले भी include करो और फिर filter करो
+      }));
+    } catch (err) {
+      console.error(
+        "Application Documents Error for ID",
+        applicationId,
+        ":",
+        err
+      );
+    }
+  };
+
+  // useEffect में call करो
+  useEffect(() => {
+    applications.forEach((app) => {
+      fetchApplicationDocuments(app.id);
+    });
+  }, [applications]);
+
   const fetchApplications = async () => {
     try {
       setLoading(true);
       const data = await getUserApplications();
+      console.log("Fetched applications:", data);
       if (data) {
         setApplications(data);
         setError("");
@@ -50,8 +96,8 @@ const ApplicationsPage = () => {
   };
 
   const openEditModal = (app) => {
-    localStorage.setItem("userApplicationData",JSON.stringify(app))
-    router.push(`/dashboard/user/apply?isApplicationEdit=true`, app)
+    localStorage.setItem("userApplicationData", JSON.stringify(app));
+    router.push(`/dashboard/user/apply?isApplicationEdit=true`, app);
   };
 
   const handleEditSubmit = async (e) => {
@@ -104,49 +150,78 @@ const ApplicationsPage = () => {
             <tr>
               <th className="text-white">#</th>
               <th className="text-white">Applicant Name</th>
-              {/* <th className="text-white">Email</th> */}
               <th className="text-white">Loan Amount</th>
               <th className="text-white">Loan Type</th>
               <th className="text-white">Status</th>
               <th className="text-white">Created At</th>
+              <th className="text-white">Review Comments</th>
               <th className="text-white">Actions</th>
             </tr>
           </thead>
           <tbody>
             {applications.length > 0 ? (
-              applications.map((app, index) => (
-                <tr key={app.id}>
-                  <td>{index + 1}</td>
-                  <td>
-                    {app.user?.firstName} {app.user?.lastName}
-                  </td>
-                  {/* <td>{app.user?.email}</td> */}
-                  <td>₹{app.amount || "N/A"}</td>
-                  <td>{app.loanType?.name || "N/A"}</td>
-                  <td>
-                    <span className="badge bg-info text-white">
-                      {app.status?.name || "Processing"}
-                    </span>
-                  </td>
-                  <td>{formatDate(app.createdAt)}</td>
-                  <td>
-                    <div className="d-flex justify-content-center gap-2">
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => viewApplicationDetails(app.id)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className="btn btn-sm btn-warning"
-                        onClick={() => openEditModal(app)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              applications.map((app, index) => {
+                console.log(
+                  "Rendering application:",
+                  app.id,
+                  "Comments:",
+                  reviewComments[app.id]
+                );
+                return (
+                  <tr key={app.id}>
+                    <td>{index + 1}</td>
+                    <td>
+                      {app.user?.firstName} {app.user?.lastName}
+                    </td>
+                    <td>₹{app.amount || "N/A"}</td>
+                    <td>{app.loanType?.name || "N/A"}</td>
+                    <td>
+                      <span className="badge bg-info text-white">
+                        {app.status?.name || "Processing"}
+                      </span>
+                    </td>
+                    <td>{formatDate(app.createdAt)}</td>
+                    <td>
+                      {console.log(
+                        "App ID:",
+                        app.id,
+                        "Comments:",
+                        reviewComments[app.id]
+                      )}
+                      {reviewComments[app.id]?.length > 0 ? (
+                        reviewComments[app.id].map((doc, i) => (
+                          <p key={i} className="mb-1">
+                            {doc.reviewComments}
+                            <br />
+                            <small className="text-muted">
+                              {doc.type} - {formatDate(doc.createdAt)}
+                            </small>
+                          </p>
+                        ))
+                      ) : (
+                        <span>No comments</span>
+                      )}
+                    </td>
+
+                    <td>
+                      <div className="d-flex justify-content-center gap-2">
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => viewApplicationDetails(app.id)}
+                        >
+                          View
+                        </button>
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => openEditModal(app)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="8" className="text-center">
@@ -156,21 +231,6 @@ const ApplicationsPage = () => {
             )}
           </tbody>
         </table>
-      </div>
-
-      <div className="modal fade" id="editModal" tabIndex="-1">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Edit Application</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

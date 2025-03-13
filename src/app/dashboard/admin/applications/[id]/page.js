@@ -277,67 +277,94 @@ const ApplicationDetailsPage = () => {
               </div>
 
               {document?.file?.path && (
-                <table
-                  className="table table-bordered text-center"
-                  style={{ width: "100%", borderCollapse: "collapse" }}
-                >
-                  <thead>
-                    <tr
-                      style={{ backgroundColor: "#a0f0e0", fontWeight: "bold" }}
-                    >
-                      <th style={{ padding: "10px", border: "1px solid #ccc" }}>
-                        Documents
-                      </th>
-                      <th style={{ padding: "10px", border: "1px solid #ccc" }}>
-                        Action
-                      </th>
-                      <th style={{ padding: "10px", border: "1px solid #ccc" }}>
-                        Feedback
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[{ name: "Adhaar Document" }].map((doc, index) => (
-                      <tr
-                        key={index}
-                        style={{ borderBottom: "1px solid #ccc" }}
-                      >
-                        <td
-                          style={{ padding: "10px", border: "1px solid #ccc" }}
-                        >
-                          <strong>{doc.name}</strong>
-                        </td>
-                        <td
-                          style={{ padding: "10px", border: "1px solid #ccc" }}
-                        >
-                          <a
-                            href={document.file.path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary"
-                            style={{
-                              textDecoration: "none",
-                              fontWeight: "500",
-                            }}
-                          >
-                            Click to View
-                          </a>
-                        </td>
-                        <td
-                          style={{ padding: "10px", border: "1px solid #ccc" }}
-                        >
-                          <span
-                            className="text-danger"
-                            style={{ cursor: "pointer", fontWeight: "500" }}
-                            onClick={() => setShowCommentModal(true)}
-                          >
-                            Document not looking good?
-                          </span>
-                        </td>
+                <>
+                  <h3 className="text-center bg-info text-dark p-2 rounded">
+                    Documents
+                  </h3>
+                  <table className="table table-bordered text-center">
+                    <thead>
+                      <tr className="bg-info text-dark fw-bold">
+                        <th className="p-3">Document</th>
+                        <th className="p-3">View</th>
+                        <th className="p-3">Comments from Admin</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {[
+                        { name: "Adhaar Document", status: "approved" },
+                        { name: "Passport Document", status: "rejected" },
+                        { name: "Pan Document", status: "rejected" },
+                      ].map((doc, index) => (
+                        <tr key={index}>
+                          <td className="p-3">
+                            <strong>{doc.name}</strong>
+                          </td>
+                          <td className="p-3">
+                            {doc.status === "approved" ? (
+                              <a
+                                href={document.file.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary fw-semibold text-decoration-none"
+                              >
+                                Click to View
+                              </a>
+                            ) : (
+                              <span className="text-danger fw-semibold">
+                                Upload again
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {doc.status === "approved" ? (
+                              <span className="text-success fw-semibold">
+                                Looks good
+                              </span>
+                            ) : (
+                              <span
+                                className="text-danger fw-semibold"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => setShowCommentModal(true)}
+                              >
+                                Document not looking good?
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
+
+              {/* Comment Modal */}
+              {showCommentModal && (
+                <div className="modal d-block" tabIndex="-1">
+                  <div className="modal-dialog">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h5 className="modal-title">Admin Feedback</h5>
+                        <button
+                          type="button"
+                          className="btn-close"
+                          onClick={() => setShowCommentModal(false)}
+                        ></button>
+                      </div>
+                      <div className="modal-body">
+                        <p>Whatever admin comment is...</p>
+                      </div>
+                      <div className="modal-footer">
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setShowCommentModal(false)}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>

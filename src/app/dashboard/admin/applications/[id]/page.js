@@ -37,10 +37,22 @@ const ApplicationDetailsPage = () => {
   const [comment, setComment] = useState("");
   const [showNewDocModal, setShowNewDocModal] = useState(false);
   const [newDoc, setNewDoc] = useState({ name: "", type: "", comments: "" });
+  const [kycDetails, setKycDetails] = useState(null);
+  const [businessDetails, setBusinessDetails] = useState(null);
+  const [applicationDocuments, setApplicationDocuments] = useState([]);
+  const [additionalDocuments, setAdditionalDocuments] = useState([]);
 
   useEffect(() => {
-    if (id) fetchDocumentDetails();
+    if (id) {
+      fetchDocumentDetails();
+    }
   }, [id]);
+
+  useEffect(() => {
+    if (document?.application?.id) {
+      fetchAllDetails();
+    }
+  }, [document]);
 
   const fetchDocumentDetails = async () => {
     setLoading(true);
@@ -62,6 +74,7 @@ const ApplicationDetailsPage = () => {
       });
 
       setDocument(response.data);
+      console.log("Document details fetched:", response.data);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch details");
     } finally {
@@ -69,38 +82,112 @@ const ApplicationDetailsPage = () => {
     }
   };
 
+  const fetchAllDetails = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token || !document?.application?.id) return;
+
+    try {
+      const applicationId = document.application.id;
+      console.log("Fetching details with application ID:", applicationId);
+
+      const filterObj = {
+        application: {
+          id: applicationId,
+        },
+      };
+
+      const baseURL = "http://194.195.112.4:3070/api/v1";
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        accept: "application/json",
+      };
+
+      // Create properly encoded filter parameter
+      const filtersStr = JSON.stringify(filterObj);
+      const filtersParam = `filters=${encodeURIComponent(filtersStr)}`;
+
+      // KYC Details
+      const kycUrl = `${baseURL}/application-kycs?page=1&${filtersParam}`;
+      console.log("KYC URL being called:", kycUrl);
+      const kycResponse = await axios.get(kycUrl, { headers });
+      console.log("KYC Response Data:", kycResponse.data.data[0]);
+
+      // Set KYC details directly from the response data array
+      if (kycResponse.data?.data?.length > 0) {
+        const kycData = kycResponse.data.data[0];
+        console.log("Setting KYC data:", kycData);
+        setKycDetails(kycData);
+      } else {
+        console.log("No KYC data found in response");
+        setKycDetails(null);
+      }
+
+      // Business Details
+      const businessUrl = `${baseURL}/business-details?page=1&${filtersParam}`;
+      console.log("Business URL being called:", businessUrl);
+      const businessRes = await axios.get(businessUrl, { headers });
+      console.log("Business Response Data:", businessRes.data.data[0]);
+      console.log(
+        "Business Response Data email:",
+        businessRes.data.data[0].email
+      );
+
+      // Application Documents
+      const docsUrl = `${baseURL}/application-documents?page=1&${filtersParam}`;
+      console.log("Documents URL being called:", docsUrl);
+      const docsRes = await axios.get(docsUrl, { headers });
+      console.log("Documents Response Data:", docsRes.data);
+
+      // Additional Documents
+      const additionalDocsUrl = `${baseURL}/additional-documents?page=1&${filtersParam}`;
+      console.log("Additional Documents URL being called:", additionalDocsUrl);
+      const additionalDocsRes = await axios.get(additionalDocsUrl, { headers });
+      console.log(
+        "Additional Documents Response Data:",
+        additionalDocsRes.data
+      );
+
+      // Set Business details
+      if (businessRes.data?.data?.[0]) {
+        const businessData = businessRes.data.data[0];
+        console.log("Setting Business data:", businessData);
+        setBusinessDetails(businessData);
+      }
+
+      // Set Application Documents
+      const appDocs = docsRes.data?.data || [];
+      console.log("Setting Application Documents:", appDocs);
+      setApplicationDocuments(appDocs);
+
+      // Set Additional Documents
+      const addDocs = additionalDocsRes.data?.data || [];
+      console.log("Setting Additional Documents:", addDocs);
+      setAdditionalDocuments(addDocs);
+    } catch (err) {
+      console.error("Error in fetchAllDetails:", err);
+      if (err.response) {
+        console.error("Error Response Data:", err.response.data);
+        console.error("Error Response Status:", err.response.status);
+      }
+      toast.error("Failed to fetch some application details");
+    }
+  };
+
   const handleSubmitComment = async () => {
-    if (!comment.trim()) {
-      setError("Comment cannot be empty");
+    if (!comment.trim() || !document?.id) {
+      toast.error("Comment cannot be empty");
       return;
     }
 
     setLoading(true);
-    setError(null);
     const token = localStorage.getItem("authToken");
 
-    if (!token) {
-      setError("User is not authenticated. Please log in.");
-      setLoading(false);
-      return;
-    }
-
-    console.log("fa", document.name);
-
     try {
-      const response = await axios.post(
-        `http://194.195.112.4:3070/api/v1/application-documents`,
+      const response = await axios.patch(
+        `http://194.195.112.4:3070/api/v1/application-documents/${document.id}`,
         {
-          status: document?.status || "pending",
           reviewComments: comment.trim(),
-          file: {
-            id: document?.file?.id || "",
-          },
-          type: document?.type || "",
-          name: document?.name || "",
-          application: {
-            id: document?.application?.id || "",
-          },
         },
         {
           headers: {
@@ -112,11 +199,11 @@ const ApplicationDetailsPage = () => {
 
       setDocument(response.data);
       setShowCommentModal(false);
-      toast.success("Comment submitted successfully!");
+      toast.success("Comment updated successfully!");
       setComment("");
+      fetchAllDetails();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to submit comment");
-      console.error("API Error:", err.response?.data);
+      toast.error(err.response?.data?.message || "Failed to update comment");
     } finally {
       setLoading(false);
     }
@@ -179,296 +266,390 @@ const ApplicationDetailsPage = () => {
 
       {!loading && !error && document && (
         <>
-          <div>
-            <div>
-              <Card className="p-4 shadow-lg  border-0 rounded">
-                <Card.Body>
-                  <h4 className="text-primary mb-4">
-                    📄 Loan & Application Details
-                  </h4>
+          {/* Application Details */}
+          <Card className="p-4 shadow-lg border-0 rounded mb-4">
+            <Card.Body>
+              <h4 className="text-primary mb-4">
+                📄 Loan & Application Details
+              </h4>
+              <Row>
+                <Col md={6}>
+                  <p>
+                    <strong>
+                      <FaClipboardCheck /> Application Name:
+                    </strong>{" "}
+                    {document.application?.name || "N/A"}
+                  </p>
+                  <p>
+                    <strong>💳 Loan Type:</strong>{" "}
+                    {document.application?.loanType?.name || "N/A"}
+                  </p>
+                  <p>
+                    <strong>
+                      <FaRupeeSign /> Amount:
+                    </strong>
+                    <Badge bg="success" className="ms-2">
+                      ₹{document.application?.amount || "N/A"}
+                    </Badge>
+                  </p>
+                </Col>
+                <Col md={6}>
+                  <p>
+                    <strong>
+                      <FaUser /> Initiated By:
+                    </strong>{" "}
+                    {document.application?.initiatedBy || "N/A"}
+                  </p>
+                  <p>
+                    <strong>📌 Application Status:</strong>
+                    <Badge
+                      bg={
+                        document.application?.status === "pending"
+                          ? "warning"
+                          : document.application?.status === "approved"
+                          ? "success"
+                          : "danger"
+                      }
+                      className="ms-2"
+                    >
+                      {document.application?.status || "N/A"}
+                    </Badge>
+                  </p>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
 
-                  <Row>
-                    <Col md={6}>
-                      <p>
-                        <strong>
-                          <FaClipboardCheck /> Application Name:
-                        </strong>{" "}
-                        {document.application?.name || "N/A"}
-                      </p>
-                      <p>
-                        <strong>💳 Loan Type:</strong>{" "}
-                        {document.application?.loanType?.name || "N/A"}
-                      </p>
-                      <p>
-                        <strong>
-                          <FaRupeeSign /> Amount:
-                        </strong>
-                        <Badge bg="success" className="ms-2">
-                          ₹{document.application?.amount || "N/A"}
-                        </Badge>
-                      </p>
-                    </Col>
+          {/* KYC Details */}
+          <Card className="p-4 shadow-lg border-0 rounded mb-4">
+            <Card.Body>
+              <h4 className="text-primary mb-4">🔒 KYC Details</h4>
+              {console.log("Current KYC Details State:", kycDetails)}
+              {kycDetails ? (
+                <Row>
+                  <Col md={6}>
+                    <p>
+                      <strong>Name:</strong> {kycDetails?.name}
+                    </p>
+                  </Col>
+                  <Col md={6}>
+                    <p>
+                      <strong>PAN:</strong> {kycDetails?.pan}
+                    </p>
+                  </Col>
+                </Row>
+              ) : (
+                <Alert variant="info">
+                  {loading
+                    ? "Loading KYC details..."
+                    : "KYC details not available"}
+                </Alert>
+              )}
+            </Card.Body>
+          </Card>
 
-                    <Col md={6}>
-                      <p>
-                        <strong>
-                          <FaUser /> Initiated By:
-                        </strong>{" "}
-                        {document.application?.initiatedBy || "N/A"}
-                      </p>
-                      <p>
-                        <strong>📌 Application Status:</strong>
-                        <Badge
-                          bg={
-                            document.application?.status === "pending"
-                              ? "warning"
-                              : document.application?.status === "approved"
-                              ? "success"
-                              : "danger"
-                          }
-                          className="ms-2"
-                        >
-                          {document.application?.status || "N/A"}
-                        </Badge>
-                      </p>
-                    </Col>
-                  </Row>
+          {/* Business Details */}
+          <Card className="p-4 shadow-lg border-0 rounded mb-4">
+            <Card.Body>
+              <h4 className="text-primary mb-4">💼 Business Details</h4>
+              {console.log("Current Business Details State:", businessDetails)}
+              {businessDetails ? (
+                <Row>
+                  <Col md={6}>
+                    {/* <p>
+                      <strong>Business Type:</strong>{" "}
+                      {businessDetails?.businessType?.name || "N/A"}
+                    </p> */}
+                    <p>
+                      <strong>Email:</strong> {businessDetails?.email}
+                    </p>
+                    <p>
+                      <strong>GST Number:</strong> {businessDetails?.gst}
+                    </p>
+                    <p>
+                      <strong>Mobile:</strong> {businessDetails?.mobile}
+                    </p>
+                    <p>
+                      <strong>Udyam Number:</strong> {businessDetails?.udyam}
+                    </p>
+                  </Col>
+                  {/* <Col md={6}>
+                    <p>
+                      <strong>Created At:</strong>{" "}
+                      {businessDetails?.createdAt
+                        ? new Date(businessDetails.createdAt).toLocaleString()
+                        : "N/A"}
+                    </p>
+                    <p>
+                      <strong>Updated At:</strong>{" "}
+                      {businessDetails?.updatedAt
+                        ? new Date(businessDetails.updatedAt).toLocaleString()
+                        : "N/A"}
+                    </p>
+                    <p>
+                      <strong>Business ID:</strong>{" "}
+                      {businessDetails?.id || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Application Status:</strong>{" "}
+                      <Badge
+                        bg={
+                          businessDetails?.application?.status === "pending"
+                            ? "warning"
+                            : "success"
+                        }
+                      >
+                        {businessDetails?.application?.status || "pending"}
+                      </Badge>
+                    </p>
+                    <p>
+                      <strong>Application Amount:</strong>{" "}
+                      <Badge bg="success">
+                        ₹{businessDetails?.application?.amount || "N/A"}
+                      </Badge>
+                    </p>
+                  </Col> */}
+                </Row>
+              ) : (
+                <Alert variant="info">
+                  {loading
+                    ? "Loading business details..."
+                    : "Business details not available"}
+                </Alert>
+              )}
+            </Card.Body>
+          </Card>
 
-                  <hr />
+          {/* Documents Section */}
+          <Card className="p-4 shadow-lg border-0 rounded mb-4">
+            <Card.Body>
+              <h4 className="text-primary mb-4">📑 Documents</h4>
+              {console.log(
+                "Current Application Documents:",
+                applicationDocuments
+              )}
+              {console.log(
+                "Current Additional Documents:",
+                additionalDocuments
+              )}
 
-                  <Row>
-                    <Col md={6}>
-                      <p>
-                        <strong>
-                          <FaCalendarAlt /> Created At:
-                        </strong>
-                        {document.application?.createdAt
-                          ? new Date(
-                              document.application.createdAt
-                            ).toLocaleString()
-                          : "N/A"}
-                      </p>
-                    </Col>
-
-                    <Col md={6}>
-                      <p>
-                        <strong>
-                          <FaCalendarAlt /> Updated At:
-                        </strong>
-                        {document.application?.updatedAt
-                          ? new Date(
-                              document.application.updatedAt
-                            ).toLocaleString()
-                          : "N/A"}
-                      </p>
-                    </Col>
-                  </Row>
-
-                  {/* Review Comments Section */}
-                </Card.Body>
-              </Card>
-              <div className="mt-4">
-                <div className="d-flex align-items-center text-secondary fw-bold">
-                  <FaCommentDots className="me-2" /> Review Comments
-                </div>
-                <div className="alert alert-light border border-secondary p-3 mt-2">
-                  {document?.reviewComments || "No comments available"}
-                </div>
+              {/* Required Documents */}
+              <div className="mb-4">
+                <h5 className="text-center bg-info text-dark p-2 rounded">
+                  Required Documents
+                </h5>
+                <Table bordered hover className="mt-3">
+                  <thead className="bg-info text-dark">
+                    <tr>
+                      <th className="p-3">Document Type</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Created At</th>
+                      <th className="p-3">View</th>
+                      <th className="p-3">Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applicationDocuments.map((doc) => (
+                      <tr key={doc.id}>
+                        <td className="p-3">
+                          <strong>{doc.type}</strong>
+                        </td>
+                        <td className="p-3">
+                          <Badge
+                            bg={doc.status === "Active" ? "success" : "warning"}
+                          >
+                            {doc.status || "Pending"}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          {doc.createdAt
+                            ? new Date(doc.createdAt).toLocaleString()
+                            : "N/A"}
+                        </td>
+                        <td className="p-3">
+                          {doc.file?.path ? (
+                            <a
+                              href={doc.file.path}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-sm btn-outline-primary"
+                            >
+                              View Document
+                            </a>
+                          ) : (
+                            <Badge bg="warning">Not Uploaded</Badge>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <div className="d-flex align-items-center justify-content-center gap-2">
+                            <span
+                              className={
+                                doc.status === "Active"
+                                  ? "text-success"
+                                  : "text-danger"
+                              }
+                            >
+                              {doc.reviewComments || "No comments"}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline-secondary"
+                              onClick={() => {
+                                setDocument(doc);
+                                setComment(doc.reviewComments || "");
+                                setShowCommentModal(true);
+                              }}
+                            >
+                              Add Comment
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
               </div>
 
-              {document?.file?.path && (
-                <>
-                  <h3 className="text-center bg-info text-dark p-2 rounded">
-                    Documents
-                  </h3>
-                  <table className="table table-bordered text-center">
-                    <thead>
-                      <tr className="bg-info text-dark fw-bold">
+              {/* Additional Documents */}
+              {additionalDocuments.length > 0 && (
+                <div className="mt-4">
+                  <h5 className="text-center bg-info text-dark p-2 rounded">
+                    Additional Documents
+                  </h5>
+                  <Table bordered hover className="mt-3">
+                    <thead className="bg-info text-dark">
+                      <tr>
                         <th className="p-3">Document</th>
                         <th className="p-3">View</th>
                         <th className="p-3">Comments from Admin</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {[
-                        { name: "Adhaar Document", status: "approved" },
-                        { name: "Passport Document", status: "rejected" },
-                        { name: "Pan Document", status: "rejected" },
-                      ].map((doc, index) => (
-                        <tr key={index}>
+                      {additionalDocuments.map((doc) => (
+                        <tr key={doc.id}>
                           <td className="p-3">
-                            <strong>{doc.name}</strong>
+                            <strong>{doc.type}</strong>
                           </td>
                           <td className="p-3">
-                            {doc.status === "approved" ? (
+                            {doc.file?.path ? (
                               <a
-                                href={document.file.path}
+                                href={doc.file.path}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-primary fw-semibold text-decoration-none"
+                                className="btn btn-sm btn-outline-primary"
                               >
-                                Click to View
+                                View Document
                               </a>
                             ) : (
-                              <span className="text-danger fw-semibold">
-                                Upload again
-                              </span>
+                              <Badge bg="warning">Not Uploaded</Badge>
                             )}
                           </td>
                           <td className="p-3">
-                            {doc.status === "approved" ? (
-                              <span className="text-success fw-semibold">
-                                Looks good
-                              </span>
-                            ) : (
+                            <div className="d-flex align-items-center justify-content-center gap-2">
                               <span
-                                className="text-danger fw-semibold"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => setShowCommentModal(true)}
+                                className={
+                                  doc.status === "Active"
+                                    ? "text-success"
+                                    : "text-danger"
+                                }
                               >
-                                Document not looking good?
+                                {doc.reviewComments || "No comments"}
                               </span>
-                            )}
+                              <Button
+                                size="sm"
+                                variant="outline-secondary"
+                                onClick={() => {
+                                  setDocument(doc);
+                                  setComment(doc.reviewComments || "");
+                                  setShowCommentModal(true);
+                                }}
+                              >
+                                Add Comment
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
-                  </table>
-                </>
-              )}
-
-              {/* Comment Modal */}
-              {showCommentModal && (
-                <div className="modal d-block" tabIndex="-1">
-                  <div className="modal-dialog">
-                    <div className="modal-content">
-                      <div className="modal-header">
-                        <h5 className="modal-title">Admin Feedback</h5>
-                        <button
-                          type="button"
-                          className="btn-close"
-                          onClick={() => setShowCommentModal(false)}
-                        ></button>
-                      </div>
-                      <div className="modal-body">
-                        <p>Whatever admin comment is...</p>
-                      </div>
-                      <div className="modal-footer">
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          onClick={() => setShowCommentModal(false)}
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  </Table>
                 </div>
               )}
-            </div>
-          </div>
-
-          <Card className="p-3 shadow-sm mt-4">
-            <Card.Body className="d-flex justify-content-between align-items-center">
-              <h5 className="m-0">Need a New Document?</h5>
-              <Button
-                variant="primary"
-                onClick={() => setShowNewDocModal(true)}
-              >
-                Request New Document
-              </Button>
             </Card.Body>
           </Card>
 
-          <Table bordered hover className="shadow-sm text-center">
-            <thead className="table-dark">
-              <tr>
-                <th className="text-white">Field</th>
-                <th className="text-white">User</th>
-                <th className="text-white">Chartered Accountant (CA)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <strong>Name</strong>
-                </td>
-                <td>
-                  {document.application?.user?.firstName || "N/A"}{" "}
-                  {document.application?.user?.lastName || ""}
-                </td>
-                <td>
-                  {document.application?.ca?.firstName || "N/A"}{" "}
-                  {document.application?.ca?.lastName || ""}
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Email</strong>
-                </td>
-                <td>{document.application?.user?.email || "N/A"}</td>
-                <td>{document.application?.ca?.email || "N/A"}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Mobile</strong>
-                </td>
-                <td>{document.application?.user?.mobile || "N/A"}</td>
-                <td>{document.application?.ca?.mobile || "N/A"}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Role</strong>
-                </td>
-                <td>
-                  {document.application?.user?.firstName || "N/A"}{" "}
-                  {document.application?.user?.lastName || ""}
-                </td>
-                <td>
-                  {document.application?.ca?.firstName || "N/A"}{" "}
-                  {document.application?.ca?.lastName || ""}
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Status</strong>
-                </td>
-                <td>{document.application?.user?.status?.name || "N/A"}</td>
-                <td>{document.application?.ca?.status?.name || "N/A"}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Photo</strong>
-                </td>
-                <td>
-                  {document.application?.user?.photo?.path ? (
-                    <Image
-                      src={document.application.user.photo.path}
-                      rounded
-                      width={50}
-                      height={50}
-                    />
-                  ) : (
-                    "N/A"
-                  )}
-                </td>
-                <td>
-                  {document.application?.ca?.photo?.path ? (
-                    <Image
-                      src={document.application.ca.photo.path}
-                      rounded
-                      width={50}
-                      height={50}
-                    />
-                  ) : (
-                    "N/A"
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </Table>
+          {/* User and CA Details */}
+          <Card className="p-4 shadow-lg border-0 rounded mb-4">
+            <Card.Body>
+              <h4 className="text-primary mb-4">👥 User & CA Details</h4>
+              <Table bordered hover className="mt-3">
+                <thead className="bg-dark text-white">
+                  <tr>
+                    <th>Field</th>
+                    <th>User</th>
+                    <th>Chartered Accountant (CA)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Name</strong>
+                    </td>
+                    <td>
+                      {document.application?.user?.firstName || "N/A"}{" "}
+                      {document.application?.user?.lastName || ""}
+                    </td>
+                    <td>
+                      {document.application?.ca?.firstName || "N/A"}{" "}
+                      {document.application?.ca?.lastName || ""}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Email</strong>
+                    </td>
+                    <td>{document.application?.user?.email || "N/A"}</td>
+                    <td>{document.application?.ca?.email || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Mobile</strong>
+                    </td>
+                    <td>{document.application?.user?.mobile || "N/A"}</td>
+                    <td>{document.application?.ca?.mobile || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Status</strong>
+                    </td>
+                    <td>
+                      <Badge
+                        bg={
+                          document.application?.user?.status?.name === "active"
+                            ? "success"
+                            : "warning"
+                        }
+                      >
+                        {document.application?.user?.status?.name || "N/A"}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge
+                        bg={
+                          document.application?.ca?.status?.name === "active"
+                            ? "success"
+                            : "warning"
+                        }
+                      >
+                        {document.application?.ca?.status?.name || "N/A"}
+                      </Badge>
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
 
+          {/* Comment Modal */}
           <Modal
             show={showCommentModal}
             onHide={() => setShowCommentModal(false)}
@@ -477,12 +658,16 @@ const ApplicationDetailsPage = () => {
               <Modal.Title>Add Comment</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
+              <Form.Group>
+                <Form.Label>Comment for {document?.type}</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Enter your comment here..."
+                />
+              </Form.Group>
             </Modal.Body>
             <Modal.Footer>
               <Button
@@ -497,64 +682,10 @@ const ApplicationDetailsPage = () => {
             </Modal.Footer>
           </Modal>
 
-          <Modal
-            show={showNewDocModal}
-            onHide={() => setShowNewDocModal(false)}
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Request New Document</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form.Group>
-                <Form.Label>Document Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={newDoc.name}
-                  onChange={(e) =>
-                    setNewDoc({ ...newDoc, name: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mt-2">
-                <Form.Label>Document Type</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={newDoc.type}
-                  onChange={(e) =>
-                    setNewDoc({ ...newDoc, type: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mt-2">
-                <Form.Label>Comments</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  value={newDoc.comments}
-                  onChange={(e) =>
-                    setNewDoc({ ...newDoc, comments: e.target.value })
-                  }
-                />
-              </Form.Group>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="secondary"
-                onClick={() => setShowNewDocModal(false)}
-              >
-                Close
-              </Button>
-              <Button variant="primary" onClick={newDocument}>
-                Submit
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
+          {/* Back Button */}
           <div className="mt-4">
             <Link href="/dashboard/admin/applications">
-              <Button variant="secondary" className="me-2">
-                Back to List
-              </Button>
+              <Button variant="secondary">Back to Applications</Button>
             </Link>
           </div>
         </>

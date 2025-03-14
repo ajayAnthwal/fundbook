@@ -175,7 +175,7 @@ const Page = () => {
             </div>
           </div>
         </div>
-      </div>
+    </div>
       {/* End Contact Form */}
     </main>
   );

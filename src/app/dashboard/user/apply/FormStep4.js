@@ -187,7 +187,7 @@ export default function FormStep4({
         }
 
         toast.success(`${docType} uploaded successfully!`);
-      } catch (error) {
+    } catch (error) {
         console.error("Upload Error:", error);
         toast.error(`Failed to upload ${docType}: ${error.message}`);
       } finally {
@@ -220,21 +220,21 @@ export default function FormStep4({
                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   />
                 </div>
-              </div>
-            </div>
+        </div>
+      </div>
           ))
         ) : documentMappings.length > 0 ? (
           // For new uploads, show document mappings
-          documentMappings.map((doc, index) => (
+        documentMappings.map((doc, index) => (
             <div key={index} className="row align-items-center mb-3">
               <div className="col-md-3">
                 <span className="fw-bold">{doc.documentType.name}</span>
               </div>
               <div className="col-md-9">
                 <div className="d-flex align-items-center gap-2">
-                  <input
-                    type="file"
-                    className="form-control"
+              <input
+                type="file"
+                className="form-control"
                     onChange={(e) => handleFileChange(e, doc.documentType.name)}
                     disabled={uploading}
                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
@@ -254,9 +254,9 @@ export default function FormStep4({
                   )}
                 </div>
               </div>
-            </div>
-          ))
-        ) : (
+          </div>
+        ))
+      ) : (
           <div className="text-center">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading documents...</span>

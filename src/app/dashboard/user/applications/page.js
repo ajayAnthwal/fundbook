@@ -8,7 +8,6 @@ import {
 } from "@/api/documents";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useRouter } from "next/navigation";
-import * as bootstrap from "bootstrap";
 
 const ApplicationsPage = () => {
   const [applications, setApplications] = useState([]);
@@ -20,18 +19,30 @@ const ApplicationsPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("bootstrap/dist/js/bootstrap.bundle.min.js")
+        .then(() => console.log("Bootstrap Loaded"))
+        .catch((err) => console.error("Bootstrap Import Error:", err));
+    }
+  }, []);
+
+  useEffect(() => {
     fetchApplications();
   }, []);
 
   const fetchApplicationDocuments = async (applicationId) => {
     try {
-      const authToken = localStorage.getItem("authToken");
-      console.log("Fetching documents for application:", applicationId);
+      let authToken = "";
+      if (typeof window !== "undefined") {
+        authToken = localStorage.getItem("authToken");
+      }
+
+      if (!authToken) {
+        return;
+      }
 
       const filters = encodeURIComponent(
-        JSON.stringify({
-          application: { id: applicationId },
-        })
+        JSON.stringify({ application: { id: applicationId } })
       );
 
       const response = await axios.get(
@@ -45,7 +56,6 @@ const ApplicationsPage = () => {
       );
 
       console.log("Documents API response:", response.data);
-
       if (response.data?.data) {
         const latestComments = response.data.data.reduce((acc, doc) => {
           const existingDoc = acc[doc.type];
@@ -62,6 +72,7 @@ const ApplicationsPage = () => {
           }
           return acc;
         }, {});
+
         const documentComments = Object.values(latestComments).sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -75,10 +86,15 @@ const ApplicationsPage = () => {
       console.error("Error fetching documents for ID", applicationId, ":", err);
     }
   };
+
   useEffect(() => {
-    applications.forEach((app) => {
-      fetchApplicationDocuments(app.id);
-    });
+    const timeout = setTimeout(() => {
+      applications.forEach((app) => {
+        fetchApplicationDocuments(app.id);
+      });
+    }, 500);
+
+    return () => clearTimeout(timeout);
   }, [applications]);
 
   const fetchApplications = async () => {
@@ -113,30 +129,7 @@ const ApplicationsPage = () => {
 
   const openEditModal = (app) => {
     localStorage.setItem("userApplicationData", JSON.stringify(app));
-    router.push(`/dashboard/user/apply?isApplicationEdit=true`, app);
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const updatedData = {
-        amount: editApp.amount,
-        loanType: { id: editApp.loanType },
-        name: editApp.name,
-        status: editApp.status,
-      };
-
-      await updateApplication(editApp.id, updatedData);
-      fetchApplications();
-      setEditApp(null);
-      new bootstrap.Modal(document.getElementById("editModal")).hide();
-    } catch (err) {
-      console.error("Update Error:", err);
-      setError(err.message || "Failed to update application");
-    } finally {
-      setLoading(false);
-    }
+    router.push(`/dashboard/user/apply?isApplicationEdit=true`);
   };
 
   const formatDate = (dateString) => {
@@ -164,84 +157,61 @@ const ApplicationsPage = () => {
         <table className="table table-striped table-hover table-bordered">
           <thead className="table-dark">
             <tr>
-              <th className="text-white">Applicant Name</th>
-              <th className="text-white">Loan Amount</th>
-              <th className="text-white">Loan Type</th>
+              <th className="text-white">Application</th>
+              <th className="text-white">Date started</th>
+              {/* <th className="text-white">Loan Type</th> */}
               <th className="text-white">Status</th>
-              <th className="text-white">Created At</th>
-              <th className="text-white">Review Comments</th>
+              <th className="text-white">Shared with CA</th>
+              {/* <th className="text-white">Review Comments</th> */}
               <th className="text-white">Actions</th>
             </tr>
           </thead>
           <tbody>
             {applications.length > 0 ? (
-              applications.map((app, index) => {
-                console.log(
-                  "Rendering application:",
-                  app.id,
-                  "Comments:",
-                  reviewComments[app.id]
-                );
-                return (
-                  <tr key={app.id}>
-                    <td>
-                      {app.user?.firstName} {app.user?.lastName}
-                    </td>
-                    <td>₹{app.amount || "N/A"}</td>
-                    <td>{app.loanType?.name || "N/A"}</td>
-                    <td>
-                      <span className="badge bg-info text-white">
-                        {app.status || "Processing"}
-                      </span>
-                    </td>
-                    <td>{formatDate(app.createdAt)}</td>
-                    <td className="d-flex align-items-center justify-content-center">
-                      {reviewComments[app.id]?.length > 0 ? (
-                        reviewComments[app.id].map((doc, i) => (
-                          <div
-                            key={i}
-                            className="mb-2 d-flex align-items-center justify-content-center flex-column gap-1"
-                          >
-                            <span className="badge bg-secondary">
-                              {doc.type}
-                            </span>
-                            <span
-                              className={`badge ${
-                                doc.status === "Active"
-                                  ? "bg-success"
-                                  : "bg-danger"
-                              }`}
-                            >
-                              {doc.comment}
-                            </span>
-                          </div>
-                        ))
-                      ) : (
-                        <span className="badge bg-secondary text-center">
-                          No comments
-                        </span>
-                      )}
-                    </td>
+              applications.map((app) => (
+                <tr key={app.id}>
+                  <td>
+                    {app.user?.firstName} {app.user?.lastName}
+                  </td>
+                  <td>{formatDate(app.createdAt)}</td>
 
-                    <td>
-                      <div className="d-flex justify-content-center gap-2">
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={() => viewApplicationDetails(app.id)}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="btn btn-sm btn-warning"
-                          onClick={() => openEditModal(app)}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
+                  <td>
+                    <span className="badge bg-info text-white">
+                      {app.status || "Processing"}
+                    </span>
+                  </td>
+
+                  <td className="text-center">Share</td>
+                  {/* <td className="d-flex align-items-center justify-content-center">
+                    {reviewComments[app.id]?.length > 0 ? (
+                      reviewComments[app.id].map((doc, i) => (
+                        <div key={i} className="mb-2 text-center">
+                          <span className="badge bg-secondary">{doc.type}</span>
+                          <span className={`badge ${doc.status === "Active" ? "bg-success" : "bg-danger"}`}>
+                            {doc.comment}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="badge bg-secondary">No comments</span>
+                    )}
+                  </td> */}
+                  <td>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => viewApplicationDetails(app.id)}
+                    >
+                      View
+                    </button>
+                    <button
+                      className="btn btn-sm btn-warning"
+                      onClick={() => openEditModal(app)}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan="8" className="text-center">

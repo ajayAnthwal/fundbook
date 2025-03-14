@@ -196,7 +196,7 @@ const ApplicationsPage = () => {
                       <span className="badge bg-secondary">No comments</span>
                     )}
                   </td> */}
-                  <td>
+                  <td className="d-flex gap-2">
                     <button
                       className="btn btn-sm btn-primary"
                       onClick={() => viewApplicationDetails(app.id)}

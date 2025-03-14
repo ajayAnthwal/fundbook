@@ -4,6 +4,7 @@ import { authAPI } from "@/api/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { isAdmin, login, registerUser } from "@/api/client";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -24,29 +25,21 @@ export default function AuthPage() {
       let response;
 
       if (isLogin) {
-        response = await toast.promise(authAPI.login(data), {
+        response = await toast.promise(login(data), {
           loading: "Signing in...",
           success: "Successfully signed in!",
           error: (err) => err.message || "Failed to sign in",
         });
       } else {
-        response = await toast.promise(authAPI.register(data), {
-          loading: "Creating account...",
-          success: "Account created successfully!",
-          error: (err) => err.message || "Failed to create account",
-        });
+        response = await registerUser(data);
       }
       console.log("Auth API Response:", response);
-      if (response?.token) {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify(response.user));
-          localStorage.setItem("token", response.token);
-          console.log("Token set successfully!");
-        }
-        router.push("/dashboard/user/home");
+      if (isAdmin()) {
+        router.push("/dashboard/admin/home");
       } else {
-        toast.error("Token not received from API");
+        router.push("/dashboard/user/home");
       }
+      
     } catch (err) {
       console.error("Auth Error:", err);
     } finally {

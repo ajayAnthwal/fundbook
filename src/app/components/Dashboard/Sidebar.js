@@ -3,18 +3,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { getRole } from "@/api/client";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const [role, setRole] = useState("");
 
   useEffect(() => {
-    // Retrieve role from localStorage
-    const storedUserData = localStorage.getItem("userData");
-    if (storedUserData) {
-      const userData = JSON.parse(storedUserData);
-      setRole(userData?.role?.name || "User"); // Default to "User" if role is missing
-    }
+    setRole(getRole());
+    console.log('role', getRole());
   }, []);
 
   return (

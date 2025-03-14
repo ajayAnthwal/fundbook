@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { getLoanTypes } from "@/api/loanService";
-import { createLoanTypes } from "@/api/admin/api";
+import { createLoanTypes, getLoanTypes } from "@/api/client";
 
 const ManageLoanTypes = () => {
   const [loanTypes, setLoanType] = useState([]);
@@ -10,7 +8,7 @@ const ManageLoanTypes = () => {
   useEffect(() => {
     (async function () {
       const data = await getLoanTypes();
-      if (data?.data) {
+      if (data) {
         setLoanType(data.data);
       }
     })();

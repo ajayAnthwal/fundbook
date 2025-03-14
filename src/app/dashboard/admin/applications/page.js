@@ -3,10 +3,11 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Spinner, Alert, Button, Pagination } from "react-bootstrap";
+import { getApplications } from "@/api/client";
 
 const ApplicationDocumentsPage = () => {
   const API_URL = "http://194.195.112.4:3070/api/v1/application-documents";
-  const [documents, setDocuments] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,31 +15,18 @@ const ApplicationDocumentsPage = () => {
   const pageSize = 10; // Per page limit
 
   useEffect(() => {
-    fetchDocuments();
+    fetchApplications();
   }, [currentPage]);
 
-  const fetchDocuments = async () => {
+  const fetchApplications = async () => {
     setLoading(true);
     setError(null);
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      setError("User is not authenticated. Please log in.");
-      setLoading(false);
-      return;
-    }
 
     try {
-      const response = await axios.get(API_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        params: { page: currentPage, limit: pageSize, filters: "" },
-      });
-
-      setDocuments(response.data.data || []);
-      setTotalPages(response.data.totalPages || 1);
+      const applications = await getApplications(currentPage);
+      console.log(applications.data);
+      setApplications(applications.data);
+      // setTotalPages(response.data.totalPages || 1);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch documents");
     } finally {
@@ -57,45 +45,32 @@ const ApplicationDocumentsPage = () => {
           <Table striped bordered hover responsive>
             <thead className="table-dark">
               <tr>
-                <th className="text-white text-center">#</th>
-                <th className="text-white text-center">ID</th>
-                <th className="text-white text-center">Name</th>
+                <th className="text-white text-center">Application</th>
+                <th className="text-white text-center">Started At</th>
+                <th className="text-white text-center">Amount</th>
                 <th className="text-white text-center">Status</th>
-                <th className="text-white text-center">Created At</th>
-                <th className="text-white text-center">Action</th>
+                <th className="text-white text-center">CA</th>
               </tr>
             </thead>
             <tbody>
-              {documents.length > 0 ? (
-                documents.map((doc, index) => (
-                  <tr key={doc.firstName || index}>
-                    <td>{(currentPage - 1) * pageSize + index + 1}</td>
-                    <td>{doc.application.user.firstName || "N/A"}</td>
-                    <td>{doc.application?.name || "N/A"}</td>
+              {applications.length > 0 ? (
+                applications.map((application, index) => (
+                  <tr key={index}>
                     <td>
-                      <span
-                        className={`badge bg-${
-                          doc.status === "Active" ? "success" : "warning"
-                        }`}
-                      >
-                        {doc.status || "Pending"}
-                      </span>
-                    </td>
-                    
-                    <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <Link href={`/dashboard/admin/applications/${doc.id}`}>
-                        <Button variant="info" size="sm">
-                          View Details
-                        </Button>
+                      <Link href={`/dashboard/admin/applications/${application.id}`}>
+                        {application.name}
                       </Link>
                     </td>
+                    <td>{new Date(application.createdAt).toLocaleDateString()}</td>
+                    <td>{application.amount}</td>
+                    <td>{application.status}</td>
+                    <td>{application.ca ? application.ca.firstName : 'n/a'}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="7" className="text-center text-muted">
-                    No documents found.
+                    No Applications found.
                   </td>
                 </tr>
               )}

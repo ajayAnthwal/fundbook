@@ -5,6 +5,7 @@ import { FaUserCircle } from "react-icons/fa";
 import { PiSuitcaseSimpleBold } from "react-icons/pi";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Image from "next/image";
+import { getRole, getUserDetail, isLoggedin, logout } from "@/api/client";
 
 const Navbar = () => {
   const router = useRouter();
@@ -12,27 +13,16 @@ const Navbar = () => {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setRole(parsedUser.role?.name || "User");
+    setUser(getUserDetail());
+    setRole(getRole());
+
+    if (!isLoggedin()) {
+      router.push("/auth");
     }
-
-    const checkToken = () => {
-      if (!localStorage.getItem("token")) {
-        router.push("/auth");
-      }
-    };
-
-    checkToken();
-    const interval = setInterval(checkToken, 5000);
-    return () => clearInterval(interval);
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    await logout();
     router.push("/auth");
   };
 

@@ -6,12 +6,15 @@ import Sidebar from "../components/Dashboard/Sidebar";
 import Navbar from "../components/Dashboard/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Row, Col } from "react-bootstrap";
+import { isLoggedin } from "@/api/client";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    checkAuth(router); 
+    if (!isLoggedin()) {
+      router.push('/auth');
+    }
   }, []);
 
   return (

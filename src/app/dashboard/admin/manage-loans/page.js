@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { createLoanTypes, getLoanTypes } from "@/api/client";
+import { getLoanTypes } from "@/api/client";
 import { Button, Table } from "react-bootstrap";
-import LoanTypesModal from "@/app/components/application/loan_types_modal";
+import LoanTypesModal from "@/app/components/modal/loan_types_modal";
 import toast from "react-hot-toast";
 import { CiEdit } from "react-icons/ci";
-import LoanTypesEditModal from "@/app/components/application/loan_types_edit_modal";
+import LoanTypesEditModal from "@/app/components/modal/loan_types_edit_modal";
 
 const ManageLoanTypes = () => {
   const [loanTypes, setLoanType] = useState([]);

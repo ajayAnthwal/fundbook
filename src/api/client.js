@@ -11,7 +11,7 @@ export async function login(credentials) {
         email: credentials.email,
         password: credentials.password,
     });
-    console.log('Login success', response.data);
+    console.log('Login success', response.data.user);
 
     Cookies.set('accessToken', response.data.token, { expires: response.data.tokenExpires });
     Cookies.set('refreshToken', response.data.refreshToken, { expires: response.data.tokenExpires });
@@ -21,6 +21,28 @@ export async function login(credentials) {
   } catch (error) {
       console.error('Failed to refresh token:', error.message);
       throw error; // Propagate the error
+  }
+}
+
+export async function refreshAccessToken() {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {},
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('refreshToken')}`,
+        },
+      }
+    );
+
+    console.log('after refresh, response', response.data);
+    // Update the access token
+    Cookies.set('accessToken', response.data.token, { expires: response.data.tokenExpires });
+    Cookies.set('refreshToken', response.data.refreshToken, { expires: response.data.tokenExpires });
+    // Cookies.set('userData', JSON.stringify(response.data.user), { expires: response.data.tokenExpires });
+    console.log('Token refreshed successfully:');
+  } catch (error) {
+      console.error('Failed to refresh token:', error.message);
+      throw error; // Propagate the error if refresh fails
   }
 }
 
@@ -69,27 +91,6 @@ export function isCA() {
     return JSON.parse(Cookies.get('userData')).role.id === 3;
   }
   return null;
-}
-
-export async function refreshAccessToken() {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {},
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get('refreshToken')}`,
-          },
-        }
-      );
-
-      // Update the access token
-      Cookies.set('accessToken', response.data.token, { expires: response.data.tokenExpires });
-      Cookies.set('refreshToken', response.data.refreshToken, { expires: response.data.tokenExpires });
-      Cookies.set('userData', JSON.stringify(response.data.user), { expires: response.data.tokenExpires });
-      console.log('Token refreshed successfully:');
-    } catch (error) {
-        console.error('Failed to refresh token:', error.message);
-        throw error; // Propagate the error if refresh fails
-    }
 }
 
 // Wrapper function to handle API requests with token refresh
@@ -177,6 +178,12 @@ export const getLoanTypes = async () => {
   return await makeRequest({
     method: 'get',
     url: `${API_BASE_URL}/api/v1/loan-types`,
+  });
+};
+export const getDocumentTypes = async () => {
+  return await makeRequest({
+    method: 'get',
+    url: `${API_BASE_URL}/api/v1/document-types`,
   });
 };
 
@@ -302,7 +309,7 @@ export const getApplications = async (page = 1) => {
   });
 };
 
-export const ManageBusinessTypes = async (data) => {
+export const saveBusinessType = async (data) => {
   return await makeRequest({
     method: 'post',
     url: `${API_BASE_URL}/api/v1/business-types`,
@@ -317,10 +324,31 @@ export const createLoanTypes = async (data) => {
     data,
   });
 };
+export const createDocumentTypes = async (data) => {
+  return await makeRequest({
+    method: 'post',
+    url: `${API_BASE_URL}/api/v1/document-types`,
+    data,
+  });
+};
 export const updateLoanTypes = async (id, data) => {
   return await makeRequest({
     method: 'patch',
     url: `${API_BASE_URL}/api/v1/loan-types/${id}`,
+    data,
+  });
+};
+export const updateDocumentTypes = async (id, data) => {
+  return await makeRequest({
+    method: 'patch',
+    url: `${API_BASE_URL}/api/v1/document-types/${id}`,
+    data,
+  });
+};
+export const updateBusinessTypes = async (id, data) => {
+  return await makeRequest({
+    method: 'patch',
+    url: `${API_BASE_URL}/api/v1/business-types/${id}`,
     data,
   });
 };

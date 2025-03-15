@@ -1,10 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { getBusinessTypes } from "@/api/loanService";
-import { ManageBusinessTypes } from "@/api/admin/api";
+import { getBusinessTypes, saveBusinessTypes } from "@/api/client";
+import { Button, Table } from "react-bootstrap";
+import { CiEdit } from "react-icons/ci";
+import BusinessTypesModal from "@/app/components/modal/business_types_modal";
+import BusinessTypesEditModal from "@/app/components/modal/business_types_edit_modal";
+import toast from "react-hot-toast";
 
 const ManageBusinessType = () => {
   const [businessTypes, setBusinessTypes] = useState([]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedBusinessType, setSelectedBusinessType] = useState(null);
 
   useEffect(() => {
     (async function () {
@@ -18,41 +26,77 @@ const ManageBusinessType = () => {
     })();
   }, []);
 
-  const handleAddBusiness = async () => {
-    const name = prompt("Enter new Business Type:");
-    if (!name) return;
-
-    try {
-      const res = await ManageBusinessTypes({ name });
-      if (res) {
-        toast.success("Business type added successfully!");
-        setBusinessTypes([...businessTypes, res]);
-      }
-    } catch (err) {
-      console.error("Application Submit Error:", err);
-      toast.error(err.message || "Failed to submit business type!");
-    }
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+  const handleOpenEditModal = (businessType) => {
+    console.log('handle open edit modal', businessType);
+    setSelectedBusinessType(businessType);
+    setShowEditModal(true);
   };
 
   return (
     <div className="container mt-5">
       <h1 className="fs-4 fw-bold mb-4">🏢 Manage Business Types</h1>
 
-      <button onClick={handleAddBusiness} className="btn btn-success mb-3">
+      <Button 
+        className="btn btn-success mb-3"
+        onClick={() => handleOpenModal()}>
         ➕ Add Business Type
-      </button>
+      </Button>
 
-      <ul className="list-group">
-        {businessTypes.length > 0 ? (
+      <Table bordered hover className="mt-3">
+        <thead className="bg-info text-dark">
+          <tr>
+            <th className="p-3">Name</th>
+            <th className="p-3">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+        {businessTypes.length > 0 && (
           businessTypes.map((b, index) => (
-            <li key={index} className="list-group-item">
-              {b?.name}
-            </li>
+            <tr key={index}>
+              <td>{b.name}</td>
+              <td>
+                <Button 
+                  className="btn btn-xs bg-dark"
+                  onClick={() => handleOpenEditModal(b)}>
+                  <CiEdit />
+                </Button>
+              </td>
+            </tr>
           ))
-        ) : (
-          <li className="list-group-item">No Business Types Found</li>
         )}
-      </ul>
+        </tbody>
+      </Table>
+
+      <BusinessTypesModal
+        show={showModal}
+        onClose={async () => {
+          setShowModal(false);
+          toast.success("Business type added successfully!");
+
+          const data = await getBusinessTypes();
+          if (data) {
+            setBusinessTypes(data.data);
+          }
+        }}
+      />
+
+      <BusinessTypesEditModal
+        show={showEditModal}
+        businessType={selectedBusinessType}
+        onClose={async () => {
+          setShowEditModal(false);
+          toast.success("Business type updated successfully!");
+          setSelectedBusinessType(null);
+
+          const data = await getBusinessTypes();
+          if (data) {
+            setBusinessTypes(data.data);
+          }
+        }}
+      />
     </div>
   );
 };

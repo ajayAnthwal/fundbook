@@ -1,7 +1,34 @@
+import { getApplicationAdditionalDocuments } from "@/api/client";
+import { useState } from "react";
 import { Badge, Button, Table } from "react-bootstrap";
+import AskAdditionalDocumentModal from "./ask_additional_document_modal";
+import CommentModal from "./comment";
 
-function ApplicationAdditionalDocuments({ documents }) {
+function ApplicationAdditionalDocuments({ applicationId, documents }) {
   console.log('additional documents', documents);
+
+  const [sourceDocuments, setSourceDocuments] = useState(documents);
+  const [showAskAdditionalDocModal, setShowAskAdditionalDocModal] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+
+  const handleOpenModal = () => {
+    setShowAskAdditionalDocModal(true);
+  };
+
+  const refreshDocuments = async () => {
+    const documents = await getApplicationAdditionalDocuments(applicationId);
+    setSourceDocuments(documents);
+  }
+
+  const handleOpenCommentModal = (doc) => {
+    setSelectedDocument(doc);
+    setShowCommentModal(true);
+  };
+
+  // if (sourceDocuments.data && sourceDocuments.data.length === 0) {
+  //   return <></>;
+  // }
   return (
     <div className="mb-4">
       <h3 className="text-center bg-info text-dark p-2 rounded">
@@ -18,7 +45,7 @@ function ApplicationAdditionalDocuments({ documents }) {
           </tr>
         </thead>
         <tbody>
-          {documents.data.map((doc) => (
+          {sourceDocuments.data.map((doc) => (
             <tr key={doc.id}>
               <td className="p-3">
                 <strong>{doc.type}</strong>
@@ -60,16 +87,11 @@ function ApplicationAdditionalDocuments({ documents }) {
                   >
                     {doc.reviewComments || "No comments"}
                   </span>
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
-                    onClick={() => {
-                      setDocument(doc);
-                      setComment(doc.reviewComments || "");
-                      setShowCommentModal(true);
-                    }}
-                  >
-                    Add Comment
+
+                  <Button 
+                    className="btn-xs"
+                    onClick={() => handleOpenCommentModal(doc)}>
+                    + Comment
                   </Button>
                 </div>
               </td>
@@ -77,6 +99,31 @@ function ApplicationAdditionalDocuments({ documents }) {
           ))}
         </tbody>
       </Table>
+
+      <CommentModal
+        show={showCommentModal}
+        onClose={() => {
+          setShowCommentModal(false);
+          setSelectedDocument(null);
+        }}
+        refreshDocuments={refreshDocuments}
+        document={selectedDocument}
+        isAdditionalDocument={true}
+      />
+
+      <Button 
+        className="btn-xs"
+        onClick={() => handleOpenModal()}>
+        Ask for Additional Document
+      </Button>
+      <AskAdditionalDocumentModal 
+        applicationId={applicationId}
+        show={showAskAdditionalDocModal}
+        onClose={() => {
+          setShowAskAdditionalDocModal(false);
+        }}
+        refreshDocuments={refreshDocuments}
+      />
     </div>
   );
 }

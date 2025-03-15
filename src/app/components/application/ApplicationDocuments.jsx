@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Badge, Button, Table } from "react-bootstrap";
 import CommentModal from "./comment";
 import { getApplicationDocuments } from "@/api/client";
+import AskAdditionalDocumentModal from "./ask_additional_document_modal";
 
 function ApplicationDocuments({ applicationId, documents }) {
-  // console.log('documents', documents);
+  console.log('documents', documents);
 
   const [sourceDocuments, setSourceDocuments] = useState(documents);
   const [showCommentModal, setShowCommentModal] = useState(false);

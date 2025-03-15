@@ -1,9 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { createLoanTypes, getLoanTypes } from "@/api/client";
+import { Button, Table } from "react-bootstrap";
+import LoanTypesModal from "@/app/components/application/loan_types_modal";
+import toast from "react-hot-toast";
+import { CiEdit } from "react-icons/ci";
+import LoanTypesEditModal from "@/app/components/application/loan_types_edit_modal";
 
 const ManageLoanTypes = () => {
   const [loanTypes, setLoanType] = useState([]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedLoanType, setSelectedLoanType] = useState(null);
 
   useEffect(() => {
     (async function () {
@@ -14,41 +23,77 @@ const ManageLoanTypes = () => {
     })();
   }, []);
 
-  const handleAddBusiness = async () => {
-    const name = prompt("Enter new Loan Type:");
-    if (!name) return;
-
-    try {
-      const res = await createLoanTypes({ name });
-      if (res) {
-        toast.success("Loan type added successfully!");
-        setLoanType([...loanTypes, res]);
-      }
-    } catch (err) {
-      console.error("Application Submit Error:", err);
-      toast.error(err.message || "Failed to submit Loan type!");
-    }
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+  const handleOpenEditModal = (loanType) => {
+    console.log('handle open edit modal', loanType);
+    setSelectedLoanType(loanType);
+    setShowEditModal(true);
   };
 
   return (
     <div className="container mt-5">
       <h1 className="fs-4 fw-bold mb-4">🏢 Manage Loan Types</h1>
 
-      <button onClick={handleAddBusiness} className="btn btn-success mb-3">
+      <Button 
+        className="btn btn-success mb-3"
+        onClick={() => handleOpenModal()}>
         ➕ Add Loan Type
-      </button>
+      </Button>
 
-      <ul className="list-group">
-        {loanTypes.length > 0 ? (
+      <Table bordered hover className="mt-3">
+        <thead className="bg-info text-dark">
+          <tr>
+            <th className="p-3">Name</th>
+            <th className="p-3">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+        {loanTypes.length > 0 && (
           loanTypes.map((b, index) => (
-            <li key={index} className="list-group-item">
-              {b.name}
-            </li>
+            <tr key={index}>
+              <td>{b.name}</td>
+              <td>
+                <Button 
+                  className="btn btn-xs bg-dark"
+                  onClick={() => handleOpenEditModal(b)}>
+                  <CiEdit />
+                </Button>
+              </td>
+            </tr>
           ))
-        ) : (
-          <li className="list-group-item">No Loan Types Found</li>
         )}
-      </ul>
+        </tbody>
+      </Table>
+
+      <LoanTypesModal
+        show={showModal}
+        onClose={async () => {
+          setShowModal(false);
+          toast.success("Loan type added successfully!");
+
+          const data = await getLoanTypes();
+          if (data) {
+            setLoanType(data.data);
+          }
+        }}
+      />
+
+      <LoanTypesEditModal
+        show={showEditModal}
+        loanType={selectedLoanType}
+        onClose={async () => {
+          setShowEditModal(false);
+          toast.success("Loan type updated successfully!");
+          setSelectedLoanType(null);
+
+          const data = await getLoanTypes();
+          if (data) {
+            setLoanType(data.data);
+          }
+        }}
+      />
     </div>
   );
 };

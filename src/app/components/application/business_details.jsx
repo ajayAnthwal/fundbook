@@ -19,17 +19,17 @@ function BusinessDetails({ businessDetails }) {
 
                     <tr>
                       <td>GST</td>
-                      <td>businessDetail.gst</td>
+                      <td>{businessDetail.gst}</td>
                     </tr>
 
                     <tr>
                       <td>Mobile</td>
-                      <td>businessDetail.mobile</td>
+                      <td>{businessDetail.mobile}</td>
                     </tr>
 
                     <tr>
                       <td>Udyam</td>
-                      <td>businessDetail.udyam</td>
+                      <td>{businessDetail.udyam}</td>
                     </tr>
                   </tbody>
                 </Table>

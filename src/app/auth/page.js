@@ -33,7 +33,6 @@ export default function AuthPage() {
       } else {
         response = await registerUser(data);
       }
-      console.log("Auth API Response:", response);
       if (isAdmin()) {
         router.push("/dashboard/admin/home");
       } else {

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 // CommentModal component
-const CommentModal = ({ show, onClose, document, refreshDocuments }) => {
+const CommentModal = ({ show, onClose, document, refreshDocuments, isAdditionalDocument=false }) => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +13,11 @@ const CommentModal = ({ show, onClose, document, refreshDocuments }) => {
     setLoading(true);
     try {
       // update comment in document
-      await saveDocumentComment(document.id, comment);
+      if (!isAdditionalDocument) {
+        await saveDocumentComment(document.id, comment);
+      } else {
+        await saveDocumentComment(document.id, comment, true);
+      }
 
       console.log('saved comment');
 

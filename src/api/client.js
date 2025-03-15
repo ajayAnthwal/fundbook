@@ -76,7 +76,7 @@ export async function refreshAccessToken() {
       const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {},
         {
           headers: {
-            Authorization: `Bearer ${refreshToken}`,
+            Authorization: `Bearer ${Cookies.get('refreshToken')}`,
           },
         }
       );
@@ -114,7 +114,7 @@ async function makeRequest(config) {
             await refreshAccessToken();
 
             // Retry the request with the new token
-            config.headers.Authorization = `Bearer ${accessToken}`;
+            config.headers.Authorization = `Bearer ${Cookies.get('accessToken')}`;
             const retryResponse = await axios(config);
             return retryResponse.data;
         }
@@ -245,6 +245,22 @@ export const saveDocumentComment = async (documentId, comment, isAdditionalDoc=f
   });
 };
 
+export const createAdditionalDocumentRequest = async (applicationId, comment, documentType) => {
+  return await makeRequest({
+    method: 'post',
+    url: `${API_BASE_URL}/api/v1/application-additional-documents`,
+    data: {
+      status: "pending",
+      type: documentType,
+      name: documentType,
+      application: {
+        id: applicationId
+      },
+      reviewComments: comment
+    }
+  });
+};
+
 export const getApplicationAdditionalDocuments = async (applicationId) => { 
   const filters = {
     application: { id: applicationId },
@@ -301,5 +317,10 @@ export const createLoanTypes = async (data) => {
     data,
   });
 };
-
-
+export const updateLoanTypes = async (id, data) => {
+  return await makeRequest({
+    method: 'patch',
+    url: `${API_BASE_URL}/api/v1/loan-types/${id}`,
+    data,
+  });
+};

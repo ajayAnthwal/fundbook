@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { getRole } from "@/api/client";
+import { FaRupeeSign } from "react-icons/fa";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -200,6 +201,15 @@ const Sidebar = () => {
         {/* ADMIN ROLE */}
         {role === "Admin" && (
           <>
+            <li className="nav-item">
+              <Link
+                className="nav-link bg-info"
+                href="/dashboard/user/home"
+              >
+              <FaRupeeSign size={20} /> Apply Now
+              </Link>
+            </li>
+
             <li className="nav-item">
               <Link
                 className={`nav-link ${

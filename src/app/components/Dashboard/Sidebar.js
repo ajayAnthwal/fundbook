@@ -220,18 +220,6 @@ const Sidebar = () => {
                 🏠 Home
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                className={`nav-link ${
-                  pathname.startsWith("/dashboard/admin/manage-loans")
-                    ? "active"
-                    : ""
-                }`}
-                href="/dashboard/admin/manage-loans"
-              >
-                📋 Manage loanTypes
-              </Link>
-            </li>
 
             <li className="nav-item">
               <Link
@@ -245,6 +233,45 @@ const Sidebar = () => {
                 📋 Loan Applications
               </Link>
             </li>
+            
+            <hr/>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/manage-loans")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/manage-loans"
+              >
+                📋 Manage loanTypes
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/manage-documents")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/manage-documents"
+              >
+                👥 Manage Documents Types
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  pathname.startsWith("/dashboard/admin/manage-business")
+                    ? "active"
+                    : ""
+                }`}
+                href="/dashboard/admin/manage-business"
+              >
+                🏢 Manage Business Types
+              </Link>
+            </li>
+            <hr />
 
             <li className="nav-item">
               <Link
@@ -258,30 +285,7 @@ const Sidebar = () => {
                 👥 Manage Users
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                className={`nav-link ${
-                  pathname.startsWith("/dashboard/admin/manage-documents")
-                    ? "active"
-                    : ""
-                }`}
-                href="/dashboard/admin/manage-documents"
-              >
-                👥 Manage Documents
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                className={`nav-link ${
-                  pathname.startsWith("/dashboard/admin/manage-business")
-                    ? "active"
-                    : ""
-                }`}
-                href="/dashboard/admin/manage-business"
-              >
-                🏢 Manage Business
-              </Link>
-            </li>
+
             <li className="nav-item">
               <Link
                 className={`nav-link ${
